@@ -63,9 +63,12 @@ export default function CompleteProfilePatient() {
     if (formData.fatherOrSpouseName) sendData.fatherOrSpouseName = formData.fatherOrSpouseName;
 
     try {
+      console.log("pass 1")
       const res = await axios.post(apiRoutes.patient, sendData, {
         withCredentials: true
       });
+      console.log("pass 2")
+
       console.log("res : ", res);
 
       const data = res?.data;
@@ -83,12 +86,12 @@ export default function CompleteProfilePatient() {
         }, 1000);
       } else {
         console.error(
-          `ERROR (create-patient-record): ${data?.message || "NO-DATA"}`
+          `ERROR --|-- (create-patient-record): ${data?.message || "NO-DATA"}`
         );
       }
     } catch (error) {
       console.error(
-        `ERROR (create-patient-record): ${error?.response?.data?.message}`
+        `ERROR --+-- (create-patient-record): ${error?.response?.data?.message}`
       );
       toast.error(error?.response?.data?.message || "Failed to update profile.");
     }
