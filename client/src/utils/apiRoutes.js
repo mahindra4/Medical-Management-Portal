@@ -1,4 +1,7 @@
-const baseUrl = import.meta.env.VITE_API_URL;
+// const baseUrl = import.meta.env.VITE_API_URL;
+
+const baseUrl = "http://localhost:4000/api" 
+
 export const apiRoutes = {
   baseUrl,
   purchase: `${baseUrl}/purchase`,
@@ -18,3 +21,5 @@ export const apiRoutes = {
   dashboard: `${baseUrl}/dashboard`,
   profile: `${baseUrl}/profile`,
 };
+
+// console.log(apiRoutes)

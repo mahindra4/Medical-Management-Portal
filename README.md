@@ -150,7 +150,7 @@ CLIENT_URL=
 
 ```bash
 # Backend/Server URL
-VITE_API_URL=
+VITE_API_URL= http://localhost:<port>/api 
 ```
 
 > IMP NOTE: The **USER_EMAIL** should be allowed to send email (App passwords should be allowed in the coresspoding google account setting, as Google has changed some setting regarding the App password)
@@ -176,3 +176,6 @@ VITE_API_URL=
 
 - **PostgreSQL** is used as a primary database for this project along with **Prisma** as an ORM.  
 - **Neon** is used currently for the database services.
+
+postgres schema set up
+npx prisma migrate dev 

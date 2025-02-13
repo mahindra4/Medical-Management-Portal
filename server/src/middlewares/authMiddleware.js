@@ -7,16 +7,16 @@ const ExpressError = require('../utils/ExpressError');
 const authMiddleware = (desiredRoles, flag=true) => {
     return async (req, res, next) => {
         try {
+            console.log("accessing the token")
             const token = req.cookies.token;
-
             if (!token) {
                 const error = new ExpressError("Token not found", 401);
                 next(error);
                 return ;
             }
-
+            console.log("its fine")
             const data = verifyToken(token);
-
+            console.log(`data: ${data}`)
             if (!data) {
                 const error = new ExpressError(
                     "Request is not authorized",

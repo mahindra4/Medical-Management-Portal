@@ -49,6 +49,11 @@ export default function SignUpPage() {
     console.log(user);
     if (user.role !== "PATIENT") {
       // navigate("/staff/profile");
+      console.log("not a patient")
+
+      
+
+      
       const response = await axios.post(`${apiRoutes.mail}/pending`, user);
       if (response.data.ok) {
         toast.success(response.data.message);

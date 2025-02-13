@@ -91,6 +91,25 @@ const signup = async (req, res, next) => {
   }
 };
 
+
+const add_cookie = (req, res, next) => {
+  res.cookie("token", token, {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true
+  });
+  res.cookie("role", role, {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true
+  });
+  res.cookie("name", newUser.name, {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true
+  });
+}
+
 // @desc     User Login
 // route     POST /api/auth/login
 // @access   Public
@@ -138,6 +157,7 @@ const login = async (req, res, next) => {
       },
       "2h"
     );
+
 
     res.cookie("token", token, {
       maxAge: 2 * 60 * 60 * 1000,

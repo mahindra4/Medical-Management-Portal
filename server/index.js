@@ -38,7 +38,7 @@ app.use("/api/checkup", checkupRoutes);
 app.use("/api/supplier", supplierRoutes);
 app.use("/api/medicine", medicineRoutes);
 app.use("/api/stock", stockRoutes);
-app.use("/api/patient", patientRoutes);
+app.use("/api/patient", patientRoutes); // ------------------- changed -----------------------------
 app.use("/api/category", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 app.use('/api/schedule',scheduleRoutes);
