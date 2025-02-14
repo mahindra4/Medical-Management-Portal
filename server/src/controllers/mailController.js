@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const mongoose = require("mongoose");
 const sendMail = require("../utils/sendMail.js");
 const ExpressError = require("../utils/ExpressError.js");
 const {
@@ -9,68 +8,46 @@ const {
   REJECTED_MAIL_TEMPLATE,
   FEEDBACK_SUBMIT_TEMPLATE,
 } = require("../../constants.js");
+const models = require('../models')
+const connectDB = require('../db')
+
+connectDB() // connects to the database
+
+const Request = models.Requests;
+const User = models.User;
 
 const approveRequestController = async (req, res, next) => {
   const { id } = req.body;
-  const request = await prisma.requests.findUnique({
-    where: {
-      id: id,
-    },
-  });
+  const request = await Request.findById(id);
   if (!request) {
     throw new ExpressError("Request not found", 404);
   }
 
-  const userExists = await prisma.user.findUnique({
-    where: {
-      email: request.email,
-    },
-  });
+  let userExists = await User.findOne({ email: request.email });
 
   if (userExists && userExists.status === "INACTIVE") {
-    const restoredUser = await prisma.user.update({
-      where: {
-        email: request.email,
-      },
-      data: {
-        name: request.name,
-        email: request.email,
-        role: request.role,
-        status: "ACTIVE",
-      },
+    userExists.name = request.name;
+    userExists.email = request.email;
+    userExists.role = request.role;
+    userExists.status = "ACTIVE";
+    await userExists.save();
+  } else if (!userExists) {
+    userExists = new User({
+      name: request.name,
+      email: request.email,
+      role: request.role,
     });
-    if (!restoredUser) {
-      throw new ExpressError("Error in restoring user", 500);
-    }
-  }
-  if (!userExists) {
-    const newUser = await prisma.user.create({
-      data: {
-        name: request.name,
-        email: request.email,
-        role: request.role,
-      },
-    });
-    if (!newUser) {
-      throw new ExpressError("Error in creating new user", 500);
-    }
+    await userExists.save();
   }
 
-  const approvedRequest = await prisma.requests.delete({
-    where: {
-      id: id,
-    },
-  });
-  if (!approvedRequest) {
-    throw new ExpressError("Request not found", 404);
-  }
+  await Request.findByIdAndDelete(id);
+
   const mailTemplate = APPROVED_MAIL_TEMPLATE(request.role);
   const mailOptions = {
     from: "dep2024.p06@gmail.com",
     to: request.email,
     subject: "Mediease - Request Approved",
     html: mailTemplate,
-    text: "",
   };
 
   const info = await sendMail(mailOptions);
@@ -78,39 +55,24 @@ const approveRequestController = async (req, res, next) => {
     throw new ExpressError("Error in sending approval mail to user", 500);
   }
 
-  return res.status(200).json({
-    ok: true,
-    data: [],
-    message: "Request approved successfully",
-  });
+  return res.status(200).json({ ok: true, data: [], message: "Request approved successfully" });
 };
 
 const rejectRequestController = async (req, res, next) => {
   const { id } = req.body;
-  const request = await prisma.requests.findUnique({
-    where: {
-      id: id,
-    },
-  });
+  const request = await Request.findById(id);
   if (!request) {
     throw new ExpressError("Request not found", 404);
   }
 
-  const rejectedRequest = await prisma.requests.delete({
-    where: {
-      id: id,
-    },
-  });
-  if (!rejectedRequest) {
-    throw new ExpressError("Request not found", 404);
-  }
+  await Request.findByIdAndDelete(id);
+
   const mailTemplate = REJECTED_MAIL_TEMPLATE(request.role);
   const mailOptions = {
     from: "dep2024.p06@gmail.com",
     to: request.email,
     subject: "Mediease - Request Declined",
     html: mailTemplate,
-    text: "",
   };
 
   const info = await sendMail(mailOptions);
@@ -118,54 +80,26 @@ const rejectRequestController = async (req, res, next) => {
     throw new ExpressError("Error in sending rejection mail to user", 500);
   }
 
-  return res.status(200).json({
-    ok: true,
-    data: [],
-    message: "Request rejected successfully",
-  });
+  return res.status(200).json({ ok: true, data: [], message: "Request rejected successfully" });
 };
 
 const pendingRequestController = async (req, res, next) => {
   const { name, email, role } = req.body;
-  console.log(name);
-  console.log(email);
-  console.log(role);
-  console.log("jello wolrd");
-  const request = await prisma.requests.create({
-    data: {
-      name,
-      email,
-      role,
-    },
-  });
-  if (!request) {
-    throw new ExpressError("Error in creating request", 500);
-  }
-  const admins = await prisma.user.findMany({
-    where: {
-      role: "ADMIN",
-    },
-  });
+  const request = new Request({ name, email, role });
+  await request.save();
+
+  const admins = await User.find({ role: "ADMIN" });
   const mailTemplateUser = PENDING_MAIL_TEMPLATE_USER();
-  const mailTemplateAdmin = PENDING_MAIL_TEMPLATE_ADMIN(
-    request.email,
-    request.name,
-    request.role
-  );
-  for (let i = 0; i < admins.length; i++) {
-    adminEmail = admins[i].email;
-    console.log(adminEmail);
+  const mailTemplateAdmin = PENDING_MAIL_TEMPLATE_ADMIN(request.email, request.name, request.role);
+
+  for (const admin of admins) {
     const mailOptionsAdmin = {
       from: "dep2024.p06@gmail.com",
-      to: adminEmail,
+      to: admin.email,
       subject: "Mediease - Pending Request Approval",
       html: mailTemplateAdmin,
-      text: "",
     };
-    const infoAdmin = await sendMail(mailOptionsAdmin);
-    if (!infoAdmin) {
-      throw new ExpressError("Error in sending pending mail to admin", 500);
-    }
+    await sendMail(mailOptionsAdmin);
   }
 
   const mailOptionsUser = {
@@ -173,57 +107,30 @@ const pendingRequestController = async (req, res, next) => {
     to: request.email,
     subject: "Mediease - Role Approval Pending",
     html: mailTemplateUser,
-    text: "",
   };
 
-  const infoUser = await sendMail(mailOptionsUser);
-  if (!infoUser) {
-    throw new ExpressError("Error in sending pending mail to user", 500);
-  }
+  await sendMail(mailOptionsUser);
 
-  return res.status(200).json({
-    ok: true,
-    data: [],
-    message: "Approval Pending mail sent to user successfully.",
-  });
+  return res.status(200).json({ ok: true, data: [], message: "Approval Pending mail sent to user successfully." });
 };
 
 const feedbackSubmitController = async (req, res, next) => {
   const { name, email, role } = req.user;
   const { subject, message } = req.body;
-  const admins = await prisma.user.findMany({
-    where: {
-      role: "ADMIN",
-    },
-  });
-  const mailTemplateAdmin = FEEDBACK_SUBMIT_TEMPLATE(
-    name,
-    email,
-    role,
-    subject,
-    message
-  );
-  for (let i = 0; i < admins.length; i++) {
-    adminEmail = admins[i].email;
+  const admins = await User.find({ role: "ADMIN" });
+  const mailTemplateAdmin = FEEDBACK_SUBMIT_TEMPLATE(name, email, role, subject, message);
 
+  for (const admin of admins) {
     const mailOptionsAdmin = {
       from: "dep2024.p06@gmail.com",
-      to: adminEmail,
+      to: admin.email,
       subject: `Feedback: ${subject}`,
       html: mailTemplateAdmin,
-      text: "",
     };
-    const infoAdmin = await sendMail(mailOptionsAdmin);
-    if (!infoAdmin) {
-      throw new ExpressError("Error in sending feedback", 500);
-    }
+    await sendMail(mailOptionsAdmin);
   }
 
-  return res.status(200).json({
-    ok: true,
-    data: [],
-    message: "Feedback sent successfully.",
-  });
+  return res.status(200).json({ ok: true, data: [], message: "Feedback sent successfully." });
 };
 
 module.exports = {

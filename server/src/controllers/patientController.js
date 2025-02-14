@@ -1,6 +1,15 @@
 //prisma client
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+
+// const { PrismaClient } = require("@prisma/client");
+// const prisma = new PrismaClient();
+
+const models = require('../models')
+const connectDB = require('../db')
+
+connectDB() // connects to the database
+
+
+
 const sendMail = require("../utils/sendMail");
 const { ACCOUNT_CREATED_MAIL_TEMPLATE, ACCOUNT_DELETED_MAIL_TEMPLATE} = require("../../constants");
 const ExpressError = require("../utils/ExpressError");
@@ -8,11 +17,16 @@ const ExpressError = require("../utils/ExpressError");
 // route    GET /api/patient
 // @access  Private (Admin)
 const getPatientList = async (req, res, next) => {
-  let patientList = await prisma.patient.findMany({
-    where: {
-      status: "ACTIVE",
-    },
+  // let patientList = await prisma.patient.findMany({
+  //   where: {
+  //     status: "ACTIVE",
+  //   },
+  // });
+
+  let patientList = await models.Patient.find({
+    status: 'ACTIVE'
   });
+
   return res.status(200).json({
     ok: true,
     data: patientList,
@@ -27,11 +41,14 @@ const getPatientList = async (req, res, next) => {
 const getPatient = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const patient = await prisma.patient.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    // const patient = await prisma.patient.findUnique({
+    //   where: {
+    //     id: id,
+    //   },
+    // });
+
+    const patient = await models.Patient.findById(id)
+
     console.log(patient);
 
     return res.status(200).json({
@@ -56,22 +73,31 @@ const getPatient = async (req, res, next) => {
 const createPatient = async (req, res, next) => {
   console.log(req.body);
 
-  const userRecord = await prisma.user.findUnique({
-    where: {
-      email: req.body.email,
-    },
-  });
+  // const userRecord = await prisma.user.findUnique({
+  //   where: {
+  //     email: req.body.email,
+  //   },
+  // });
+
+  const userRecord = await models.User.findOne({email: req.body.email}); 
   let newUserRecord;
   if (!userRecord) {
     //account is being created externally by admin/staff/doctor
     // Create user record
-    const createdUserRecord = await prisma.user.create({
-      data: {
-        name: req.body.name,
-        email: req.body.email,
-        role: "PATIENT",
-      },
-    });
+    // const createdUserRecord = await prisma.user.create({
+    //   data: {
+    //     name: req.body.name,
+    //     email: req.body.email,
+    //     role: "PATIENT",
+    //   },
+    // });
+
+    const createdUserRecord = await models.User.create({
+      name: req.body.name,
+      email: req.body.email,
+      role: "PATIENT",
+    })
+
     newUserRecord = createdUserRecord;
     const mailTemplate = ACCOUNT_CREATED_MAIL_TEMPLATE();
     const mailOptions = {
@@ -95,17 +121,29 @@ const createPatient = async (req, res, next) => {
     throw new ExpressError("User already exists with a different role", 400);
   } else if (userRecord && userRecord.status === "INACTIVE") {
     //make send_account_creation_mail() into utils/send-mail specific functions and reuse ****
-    const restoredUserRecord = await prisma.user.update({
-      where: {
-        email: req.body.email,
-      },
-      data: {
+    // const restoredUserRecord = await prisma.user.update({
+    //   where: {
+    //     email: req.body.email,
+    //   },
+    //   data: {
+    //     name: req.body.name,
+    //     email: req.body.email,
+    //     role: "PATIENT",
+    //     status: "ACTIVE",
+    //   },
+    // });
+    
+    const restoredUserRecord = await models.User.findOneAndUpdate(
+      {email: req.body.email},
+      {
         name: req.body.name,
         email: req.body.email,
         role: "PATIENT",
         status: "ACTIVE",
       },
-    });
+      {new: true}
+    )
+
     newUserRecord = restoredUserRecord;
     const mailTemplate = ACCOUNT_CREATED_MAIL_TEMPLATE();
     const mailOptions = {
@@ -122,32 +160,47 @@ const createPatient = async (req, res, next) => {
     }
   }
   let newPatientRecord;
-  const patientRecord = await prisma.patient.findUnique({
-    where: {
-      email: req.body.email,
-    },
-  });
+  // const patientRecord = await prisma.patient.findUnique({
+  //   where: {
+  //     email: req.body.email,
+  //   },
+  // });
+
+  const patientRecord = await models.Patient.findOne({
+    email: req.body.email
+  }) 
   if (patientRecord && patientRecord.status === "ACTIVE") {
     throw new ExpressError("Patient already exists", 400);
   }
   if (patientRecord && patientRecord.status === "INACTIVE") {
-    const restoredPatientRecord = await prisma.patient.update({
-      where: {
-        email: req.body.email,
-      },
-      data: {
-        ...req.body,
-        status: "ACTIVE",
-      },
-    });
+    // const restoredPatientRecord = await prisma.patient.update({
+    //   where: {
+    //     email: req.body.email,
+    //   },
+    //   data: {
+    //     ...req.body,
+    //     status: "ACTIVE",
+    //   },
+    // });
+
+    const restoredPatientRecord = await models.Patient.findOneAndUpdate(
+      { email: req.body.email }, 
+      { ...req.body, status: "ACTIVE" }, 
+      { new: true } // Returns the updated document
+    );
+
+    
     newPatientRecord = restoredPatientRecord;
   }
   if (!patientRecord) {
-    const createdRecord = await prisma.patient.create({
-      data: {
-        ...req.body,
-      },
-    });
+    // const createdRecord = await prisma.patient.create({
+    //   data: {
+    //     ...req.body,
+    //   },
+    // });
+
+    const createdRecord = await models.Patient.create({ ...req.body });
+
     newPatientRecord = createdRecord;
   }
 
@@ -165,23 +218,37 @@ const updatePatient = async (req, res, next) => {
   try {
     const { id } = req.params;
     console.log("req.body : ", req.body);
-    const updatedRecord = await prisma.patient.update({
-      where: {
-        id,
-      },
-      data: {
-        ...req.body,
-      },
-    });
+    // const updatedRecord = await prisma.patient.update({
+    //   where: {
+    //     id,
+    //   },
+    //   data: {
+    //     ...req.body,
+    //   },
+    // });
 
-    const updatedUserRecord = await prisma.user.update({
-      where: {
-        email: updatedRecord.email,
-      },
-      data: {
-        name: updatedRecord.name,
-      },
-    });
+    const updatedRecord = await models.Patient.findByIdAndUpdate(
+      id,
+      { ...req.body },
+      { new: true }
+    );
+    
+
+    // const updatedUserRecord = await prisma.user.update({
+    //   where: {
+    //     email: updatedRecord.email,
+    //   },
+    //   data: {
+    //     name: updatedRecord.name,
+    //   },
+    // });
+
+    const updatedUserRecord = await models.User.findOneAndUpdate(
+      { email: updatedRecord.email },
+      { name: updatedRecord.name },
+      { new: true }
+    );
+    
 
     // console.log(updatedRecord);
 
@@ -216,32 +283,48 @@ const updatePatient = async (req, res, next) => {
 const deletePatient = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const patientRecord = await prisma.patient.findUnique({
-      where: {
-        id,
-      },
-    });
+    // const patientRecord = await prisma.patient.findUnique({
+    //   where: {
+    //     id,
+    //   },
+    // });
+
+    const patientRecord = await models.Patient.findOne({ _id: id });
+
     if (!patientRecord) {
       throw new ExpressError("Patient does not exist", 404);
     }
-    const deletedUserRecord = await prisma.user.update({
-      where: {
-        email: patientRecord.email,
-      },
-      data: {
-        status: "INACTIVE",
-      },
-    });
+    // const deletedUserRecord = await prisma.user.update({
+    //   where: {
+    //     email: patientRecord.email,
+    //   },
+    //   data: {
+    //     status: "INACTIVE",
+    //   },
+    // });
+
+    const deletedUserRecord = await models.User.findOneAndUpdate(
+        { email: patientRecord.email },
+        { status: "INACTIVE" },
+        { new: true }
+    );
 
     //also send mail to the patient on successful deletion, and update confirmation dialog on client side ******
-    const deletedRecord = await prisma.patient.update({
-      where: {
-        id: id,
-      },
-      data: {
-        status: "INACTIVE",
-      },
-    });
+    // const deletedRecord = await prisma.patient.update({
+    //   where: {
+    //     id: id,
+    //   },
+    //   data: {
+    //     status: "INACTIVE",
+    //   },
+    // });
+
+    const deletedRecord = await models.Patient.findByIdAndUpdate(
+        id,
+        { status: "INACTIVE" },
+        { new: true }
+    );
+  
 
     //send mail to the patient
     const mailTemplate = ACCOUNT_DELETED_MAIL_TEMPLATE();

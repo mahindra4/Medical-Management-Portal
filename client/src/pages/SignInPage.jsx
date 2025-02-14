@@ -35,6 +35,7 @@ export default function SignInPage() {
   }
 
   const handleChange = (name, value) => {
+    // console.log(value);
     setLoginData((prevData) => ({
       ...prevData,
       [name]: value,

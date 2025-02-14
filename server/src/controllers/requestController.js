@@ -1,5 +1,11 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient()
+// const { PrismaClient } = require('@prisma/client');
+// const prisma = new PrismaClient()
+
+const models = require('../models')
+const connectDB = require('../db')
+
+connectDB() // connects to the database
+
 const ExpressError = require('../utils/ExpressError');
 
 
@@ -9,7 +15,9 @@ const ExpressError = require('../utils/ExpressError');
 
 const getAllRequests = async(req, res, next) => {
     try{
-    const requests = await prisma.requests.findMany({});
+    // const requests = await prisma.requests.findMany({});
+    
+    const requests = await models.Requests.find({});
     // console.log(requests);  
     
     return res.status(200).json({
@@ -34,11 +42,13 @@ const getAllRequests = async(req, res, next) => {
 const getRequest = async(req, res, next) => {
     try {
         const { id } = req.params;
-        const request = await prisma.requests.findUnique({
-            where: {
-                id: id
-            }
-        });
+        // const request = await prisma.requests.findUnique({
+        //     where: {
+        //         id: id
+        //     }
+        // });
+
+        const request = await models.Requests.findById(id);
         // console.log(request);  
         
         return res.status(200).json({

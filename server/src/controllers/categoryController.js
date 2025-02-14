@@ -1,20 +1,17 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
-const { v4: uuidv4 } = require("uuid");
+const mongoose = require("mongoose");
 const ExpressError = require("../utils/ExpressError");
+const models = require('../models')
+const connectDB = require('../db')
+
+connectDB() // connects to the database
+const Category = models.Category;
 
 // @desc    Get Category List
 // route    GET /api/medicine/category/list
 // @access  Private (Admin)
 const getCategoryList = async (req, res, next) => {
   try {
-    const categoryList = await prisma.category.findMany({
-      where: {
-        status: "ACTIVE",
-      },
-    });
-    // console.log(categoryList);
-
+    const categoryList = await Category.find({ status: "ACTIVE" });
     return res.status(200).json({
       ok: true,
       data: categoryList,
@@ -22,7 +19,6 @@ const getCategoryList = async (req, res, next) => {
     });
   } catch (err) {
     console.log(`Category List Fetching Error : ${err.message}`);
-
     return res.status(500).json({
       ok: false,
       data: [],
@@ -31,20 +27,13 @@ const getCategoryList = async (req, res, next) => {
   }
 };
 
-//I don't think it is used anywhere **********
 // @desc    Get Single Category
 // route    GET /api/medicine/category/:id
 // @access  Private (Admin)
 const getCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const category = await prisma.category.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    // console.log(category);
-
+    const category = await Category.findById(id);
     return res.status(200).json({
       ok: true,
       data: category,
@@ -52,7 +41,6 @@ const getCategory = async (req, res, next) => {
     });
   } catch (err) {
     console.log(`Category Fetching Error : ${err.message}`);
-
     return res.status(500).json({
       ok: false,
       data: [],
@@ -65,66 +53,43 @@ const getCategory = async (req, res, next) => {
 // route    POST /api/medicine/category/create
 // @access  Private (Admin)
 const createCategory = async (req, res, next) => {
-    console.log(req.body);
-    const { categoryName, strengthType } = req.body;
-    const categoryExists = await prisma.category.findFirst({
-      where: {
-        categoryName: categoryName.trim().toUpperCase(),
-      },
-    });
+  console.log(req.body);
+  const { categoryName, strengthType } = req.body;
+  const categoryExists = await Category.findOne({
+    categoryName: categoryName.trim().toUpperCase(),
+  });
 
-    let newCategory;
-    if (categoryExists && categoryExists.status === "ACTIVE") {
-      throw new ExpressError("Category already exists", 400);
-    }
-    if (categoryExists && categoryExists.status === "INACTIVE") {
-      const restoredCategory = await prisma.category.update({
-        where: {
-          id: categoryExists.id,
-        },
-        data: {
-          categoryName: categoryName.trim().toUpperCase(),
-          strengthType,
-          status: "ACTIVE",
-        },
-      });
-      newCategory = restoredCategory;
-    }
+  let newCategory;
+  if (categoryExists && categoryExists.status === "ACTIVE") {
+    throw new ExpressError("Category already exists", 400);
+  }
+  if (categoryExists && categoryExists.status === "INACTIVE") {
+    categoryExists.categoryName = categoryName.trim().toUpperCase();
+    categoryExists.strengthType = strengthType;
+    categoryExists.status = "ACTIVE";
+    newCategory = await categoryExists.save();
+  }
 
-    if (!categoryExists) {
-      const createdRecord = await prisma.category.create({
-        data: {
-          categoryName: categoryName.trim().toUpperCase(),
-          strengthType,
-        },
-      });
-      newCategory = createdRecord;
-    }
-    return res.status(200).json({
-      ok: true,
-      data: newCategory,
-      message: "Category record created successfully",
+  if (!categoryExists) {
+    newCategory = await Category.create({
+      categoryName: categoryName.trim().toUpperCase(),
+      strengthType,
     });
+  }
+  return res.status(200).json({
+    ok: true,
+    data: newCategory,
+    message: "Category record created successfully",
+  });
 };
 
 // @desc    Update Category List Record
-// route    PUT /api/medicine/category/
+// route    PUT /api/medicine/category/:id
 // @access  Private (Admin)
 const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    const updatedRecord = await prisma.category.update({
-      where: {
-        id,
-      },
-      data: {
-        ...req.body,
-      },
-    });
-
-    // console.log(updatedRecord);
-
+    const updatedRecord = await Category.findByIdAndUpdate(id, req.body, { new: true });
     return res.status(200).json({
       ok: true,
       data: updatedRecord,
@@ -132,42 +97,21 @@ const updateCategory = async (req, res, next) => {
     });
   } catch (err) {
     console.log(`Category List Updating Error : ${err.message}`);
-
-    const errMsg =
-      "Updating category list record failed, Please try again later";
-    const errCode = 500;
-
-    //record does not exist
-    if (err.code === "P2025") {
-      errMsg = "Record does not exist";
-      errCode = 404;
-    }
-
-    return res.status(errCode).json({
+    return res.status(500).json({
       ok: false,
       data: [],
-      message: errMsg,
+      message: "Updating category list record failed, Please try again later",
     });
   }
 };
 
 // @desc    Delete Category List Record
-// route    DELETE /api/medicine/category/delete
+// route    DELETE /api/medicine/category/:id
 // @access  Private (Admin)
 const deleteCategory = async (req, res, next) => {
   try {
-    // console.log("req.body : ", req.body);
     const { id } = req.params;
-
-    const deletedRecord = await prisma.category.update({
-      where: {
-        id: id,
-      },
-      data: {
-        status: "INACTIVE",
-      },
-    });
-
+    const deletedRecord = await Category.findByIdAndUpdate(id, { status: "INACTIVE" }, { new: true });
     return res.status(200).json({
       ok: true,
       data: deletedRecord,
@@ -175,21 +119,10 @@ const deleteCategory = async (req, res, next) => {
     });
   } catch (err) {
     console.log(`Category List Deletion Error : ${err.message}`);
-
-    const errMsg =
-      "Deleting category list record failed, Please try again later";
-    const errCode = 500;
-
-    //record does not exist
-    if (err.code === "P2025") {
-      errMsg = "Record does not exist";
-      errCode = 404;
-    }
-
-    return res.status(errCode).json({
+    return res.status(500).json({
       ok: false,
       data: [],
-      message: errMsg,
+      message: "Deleting category list record failed, Please try again later",
     });
   }
 };

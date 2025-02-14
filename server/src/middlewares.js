@@ -138,12 +138,14 @@ module.exports.validateCheckup = (req, res, next) => {
 };
 
 module.exports.validateSendOtp = (req, res, next) => {
+  // console.log('doraemon')
+  // console.log(req.body)
   const { error } = sendOtpSchema.validate(req.body);
-
   if (error) {
     const msg = error.details.map((e) => e.message).join(",");
     throw new ExpressError(msg, 400);
   } else {
+    // console.log('next')
     next();
   }
 };

@@ -57,19 +57,25 @@ const VerifyOTP = ({ email, setIsOtpSent, handler, otpSubmitHandler }) => {
     console.log(data);
     setLoading(true);
     try {
+      console.log('pass 1')
       const response = await axios.post(`${apiRoutes.otp}/verify`, {
         email: email,
         otp: data.otp,
       });
+
+      console.log('pass 2')
       if (response.data.ok) {
+        console.log('response is ok')
         toast.success(response.data.message); //toast messages are not yet integrated**** (no toaster in this branch)
         await handler();
         setIsOtpSent(false);
       } else {
+        console.log('response not ok')
         toast.error(response.data.message);
         console.log("here");
       }
     } catch (err) {
+      console.log('doraemon error')
       console.log(err);
       toast.error(err?.response?.data?.message);
       if (err.response.status < 400 && err.response.status >= 500) {
