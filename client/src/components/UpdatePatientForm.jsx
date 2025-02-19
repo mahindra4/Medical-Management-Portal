@@ -11,7 +11,7 @@ import {
     Option,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
@@ -19,7 +19,7 @@ import Layout from "../layouts/PageLayout";
 
 export default function UpdatePatientForm() {
     const { id } = useParams();
-    const navigate = useNavigate();
+    const router = userouter.push();
 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -120,7 +120,7 @@ export default function UpdatePatientForm() {
             console.log("Patient updated successfully");
             toast.success("Patient updated successfully");
             setTimeout(() => {
-                navigate("/patient");
+                router.push("/patient");
             }, 1000);
 
         } catch (error) {
@@ -150,7 +150,7 @@ export default function UpdatePatientForm() {
                                                 className="flex items-center gap-3"
                                                 size="md"
                                                 onClick={() => {
-                                                    navigate("/patient");
+                                                    router.push("/patient");
                                                 }}
                                             >
                                                 Patient List
@@ -166,7 +166,7 @@ export default function UpdatePatientForm() {
                                         className="flex items-center gap-3"
                                         size="md"
                                         onClick={() => {
-                                            navigate("/patient");
+                                            router.push("/patient");
                                         }}
                                     >
                                         Patient List

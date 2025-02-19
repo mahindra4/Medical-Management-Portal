@@ -1,5 +1,5 @@
 import React, {useEffect, useState } from "react";
-import { useParams, useNavigate} from "react-router-dom";
+import { useParams, useRouter} from "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { PrinterIcon } from "@heroicons/react/24/solid";
@@ -24,7 +24,7 @@ const TABLE_HEAD = [
 ];
 const PurchaseDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = userouter.push();
   const [loading, setLoading] = useState(true);
   const [purchaseData, setPurchaseData] = useState({
     invoiceNo: "",
@@ -83,13 +83,13 @@ const PurchaseDetail = () => {
                 </Typography>
               </div>
               <div className="flex gap-x-2 h-10">
-                <Button size="md" ripple={true} onClick={()=>navigate(`/purchase/update/${id}`)}>
+                <Button size="md" ripple={true} onClick={()=>router.push(`/purchase/update/${id}`)}>
                   Edit
                 </Button>
                 <Button size="md" ripple={true} className="flex gap-x-1 px-4" onClick={handlePrint}>
                   <PrinterIcon className="h-4" /> Print
                 </Button>
-                <Button size="md" ripple={true} className="flex gap-x-1 px-4" onClick={()=>navigate("/purchase")}>
+                <Button size="md" ripple={true} className="flex gap-x-1 px-4" onClick={()=>router.push("/purchase")}>
                   Close
                 </Button>
               </div>

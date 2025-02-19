@@ -1,6 +1,6 @@
 import { SortableTable } from "../components/SortableTable";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { toast } from "sonner";
 import { apiRoutes } from "../utils/apiRoutes";
@@ -37,7 +37,7 @@ const getMedicalHistory = async (email) => {
 };
 
 export default function MedicalHistory() {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const { userEmail } = useAuthContext();
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
@@ -54,7 +54,7 @@ export default function MedicalHistory() {
   const handleHistoryDelete = async (e, id) => {};
   const handleHistoryDetail = async (e, id, idx) => {
     console.log("History Detail", id);
-    navigate(`/prescription/${id}^${idx}`);
+    router.push(`/prescription/${id}^${idx}`);
   };
   return (
     <>

@@ -18,7 +18,7 @@ import { GiMedicines } from "react-icons/gi";
 import { FaUserDoctor } from "react-icons/fa6";
 import { FaExclamation } from "react-icons/fa";
 import Layout from "../layouts/PageLayout";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import { SyncLoadingScreen } from "../components/UI/LoadingScreen";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
 
 
   const { height, width } = useWindowDimensions();
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const chartConfigBar = {
     type: "bar",
@@ -244,7 +244,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/medicine")}
+                  onClick={() => router.push("/medicine")}
                 >
                   See Medicine List
                 </button>
@@ -264,7 +264,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/stock")}
+                  onClick={() => router.push("/stock")}
                 >
                   See Stock
                 </button>
@@ -284,7 +284,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/purchase")}
+                  onClick={() => router.push("/purchase")}
                 >
                   See Purchase List
                 </button>
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/supplier")}
+                  onClick={() => router.push("/supplier")}
                 >
                   See Supplier List
                 </button>
@@ -329,7 +329,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/medicine")}
+                  onClick={() => router.push("/medicine")}
                 >
                   See Requests
                 </button>
@@ -349,7 +349,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/stock")}
+                  onClick={() => router.push("/stock")}
                 >
                   See Patients
                 </button>
@@ -369,7 +369,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/staff")}
+                  onClick={() => router.push("/staff")}
                 >
                   See Doctors List
                 </button>
@@ -389,7 +389,7 @@ const AdminDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/schedule")}
+                  onClick={() => router.push("/schedule")}
                 >
                   See my schedule
                 </button>

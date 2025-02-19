@@ -9,14 +9,14 @@ import {
   CardFooter,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from  "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 import Layout from "../layouts/PageLayout";
 import { setNavigateTimeout, setToastTimeout } from "../utils/customTimeout";
 export default function AddAdminForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     adminName: "",
@@ -49,7 +49,10 @@ export default function AddAdminForm() {
       const data = res?.data;
       console.log("admin record saved successfully");
       setToastTimeout("success", "Admin added successfully", 200);
-      setNavigateTimeout(navigate, "/admin", 1000);
+      setTimeout(() => {
+        router.push("/admin");
+      }, 1000);
+      
     } catch (error) {
       console.error(
         `ERROR (create-admin-record): ${error?.response?.data?.message}`
@@ -86,7 +89,7 @@ export default function AddAdminForm() {
                       className="flex items-center gap-3"
                       size="md"
                       onClick={() => {
-                        navigate("/admin");
+                        router.push("/admin");
                       }}
                     >
                       Admin List
@@ -102,7 +105,7 @@ export default function AddAdminForm() {
                   className="flex items-center gap-3"
                   size="md"
                   onClick={() => {
-                    navigate("/admin");
+                    router.push("/admin");
                   }}
                 >
                   Admin List

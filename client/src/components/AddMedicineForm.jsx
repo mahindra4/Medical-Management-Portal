@@ -12,14 +12,14 @@ import {
   Select as MaterialSelect,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from  "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 
 export function AddMedicineForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     medicineType: "",
@@ -93,7 +93,7 @@ export function AddMedicineForm() {
       console.log(response);
       toast.success("Medicine added successfully");
       setTimeout(() => {
-        navigate("/medicine");
+        router.push("/medicine");
       }, 1000);
     } catch (error) {
       console.error(error);
@@ -124,7 +124,7 @@ export function AddMedicineForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          navigate("/medicine");
+                          router.push("/medicine");
                         }}
                       >
                         Medicine List
@@ -140,7 +140,7 @@ export function AddMedicineForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/medicine");
+                      router.push("/medicine");
                     }}
                   >
                     Medicine List

@@ -11,13 +11,13 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import Layout from "../layouts/PageLayout";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { setNavigateTimeout, setToastTimeout } from "../utils/customTimeout";
 export default function AddStaffForm() {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const departments = ["Ayurvedic", "Gynecology", "Homeopathy"];
   const roles = ["Doctor", "Paramedical"];
   const [loading, setLoading] = useState(false);
@@ -60,7 +60,10 @@ export default function AddStaffForm() {
         withCredentials: true,
       });
       setToastTimeout("success", "Staff added successfully", 200);
-      setNavigateTimeout(navigate, "/staff", 1000);
+      setTimeout(() => {
+        router.push("/staff");
+      }, 1000);
+      
     } catch (error) {
       console.error(error);
       setToastTimeout(
@@ -96,7 +99,7 @@ export default function AddStaffForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          navigate("/staff");
+                          router.push("/staff");
                         }}
                       >
                         Staff List
@@ -112,7 +115,7 @@ export default function AddStaffForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/staff");
+                      router.push("/staff");
                     }}
                   >
                     Staff List

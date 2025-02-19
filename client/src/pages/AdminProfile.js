@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -41,7 +41,7 @@ const getAdminData = async (userEmail) => {
 
 export default function AdminProfile({ edit = false }) {
   const { userEmail } = useAuthContext();
-  const navigate = useNavigate();
+  const router = userouter.push();
   const [loading, setLoading] = useState(false);
   const { logout } = useLogout();
   const [open, setOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function AdminProfile({ edit = false }) {
 			);
 			toast.success(response.data.message);
       setPage(!page);
-			navigate("/profile/admin");
+			router.push("/profile/admin");
 		} catch (error) {
 			console.error(`ERROR: ${error?.response?.data?.message}`);
 			toast.error(
@@ -108,7 +108,7 @@ export default function AdminProfile({ edit = false }) {
         const data = response?.data;
         if(data && data.ok) {
           await logout();
-          navigate("/signin");
+          router.push("/signin");
           console.log(data?.message);
           toast.success(data?.message);
         } else {
@@ -212,7 +212,7 @@ export default function AdminProfile({ edit = false }) {
                     size="md"
                     onClick={() => {
                       setPage(!page);
-                      navigate("/profile/admin/edit");
+                      router.push("/profile/admin/edit");
                     }}
                   >
                     Edit Profile
@@ -225,7 +225,7 @@ export default function AdminProfile({ edit = false }) {
                     size="md"
                     onClick={() => {
                       setPage(!page);
-                      navigate("/profile/admin");
+                      router.push("/profile/admin");
                     }}
                   >
                     Back

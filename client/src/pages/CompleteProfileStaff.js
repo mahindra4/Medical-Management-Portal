@@ -12,13 +12,13 @@ import {
 } from "@material-tailwind/react";
 import { toast } from "sonner";
 import { useAuthContext } from "../hooks/useAuthContext";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import Cookies from "js-cookie";
 
 export default function CompleteProfileStaff() {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const { userName, userEmail, userRole, dispatch } = useAuthContext();
   const departments = ["Ayurvedic", "Gynecology", "Homeopathy"];
   const roles = ["Doctor", "Paramedical Staff"];
@@ -69,7 +69,7 @@ export default function CompleteProfileStaff() {
         });
 
         setTimeout(() => {
-          navigate(
+          router.push(
             `/${
               userRole === "PARAMEDICAL" ? "pharmadashboard" : "doctordashboard"
             }`

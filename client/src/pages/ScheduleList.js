@@ -1,7 +1,7 @@
 import { SortableTable } from "../components/SortableTable";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import {
   SyncLoadingScreen,
 } from "../components/UI/LoadingScreen";
@@ -39,7 +39,7 @@ const getScheduleData = async () => {
 };
 
 export default function ScheduleList() {
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const [loading, setLoading] = useState(true);
   const [schedules, setSchedules] = useState([]);
@@ -53,10 +53,10 @@ export default function ScheduleList() {
     };
     fetchData();
   }, []);
-
+  const { id } = router.query; 
   const handleScheduleUpdate = (id) => {
     console.log("id : ", id);
-    if (id) navigate(`/schedule/update/${id}`);
+    if (id) router.push(`/schedule/${id}`);
   };
 
   const handleScheduleDelete = async (e, id) => {

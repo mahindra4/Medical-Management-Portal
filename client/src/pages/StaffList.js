@@ -6,7 +6,7 @@ import {
   GridLoadingScreen,
   SyncLoadingScreen,
 } from "../components/UI/LoadingScreen";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 const TABLE_HEAD = {
   id: "#",
@@ -39,7 +39,7 @@ import Layout from "../layouts/PageLayout";
 import { apiRoutes } from "../utils/apiRoutes";
 
 export default function StaffList() {
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,10 +52,10 @@ export default function StaffList() {
     };
     fetchStaffList();
   }, []);
-
+  const { id } = router.query; 
   const handleStaffUpdate = (id) => {
     console.log("id : ", id);
-    if (id) navigate(`/staff/update/${id}`);
+    if (id) router.push(`/staff/${id}`);
   };
 
   const handleStaffDelete = async (e, id) => {

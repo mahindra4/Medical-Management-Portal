@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import { toast } from "sonner";
 import {
   Card,
@@ -41,7 +41,7 @@ const getPatientData = async (userEmail) => {
 };
 
 export default function PatientProfile({ edit = false }) {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const { userEmail } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const { logout } = useLogout();
@@ -113,7 +113,7 @@ export default function PatientProfile({ edit = false }) {
       console.log(response.data.message);
       toast.success(response.data.message);
       setPage(!page);
-      navigate("/profile/patient");
+      router.push("/profile/patient");
     } catch (error) {
       console.error(`ERROR: ${error?.response?.data?.message}`);
       toast.error(
@@ -138,7 +138,7 @@ export default function PatientProfile({ edit = false }) {
         const data = response?.data;
         if (data && data.ok) {
           await logout();
-          navigate("/signin");
+          router.push("/signin");
           console.log(data?.message);
           toast.success(data?.message);
         } else {
@@ -412,7 +412,7 @@ export default function PatientProfile({ edit = false }) {
                     size="md"
                     onClick={() => {
                       setPage(!page);
-                      navigate("/profile/patient/edit");
+                      router.push("/profile/patient/edit");
                     }}
                   >
                     Edit Profile
@@ -425,7 +425,7 @@ export default function PatientProfile({ edit = false }) {
                     size="md"
                     onClick={() => {
                       setPage(!page);
-                      navigate("/profile/patient");
+                      router.push("/profile/patient");
                     }}
                   >
                     Back

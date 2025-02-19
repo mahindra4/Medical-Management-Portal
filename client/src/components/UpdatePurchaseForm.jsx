@@ -13,7 +13,7 @@ import {
   IconButton,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useNavigate, useParams } from "react-router-dom";
+import { useRouter, useParams } from "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
@@ -21,7 +21,7 @@ import Layout from "../layouts/PageLayout";
 
 export default function UpdatePurchaseForm() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -232,7 +232,7 @@ export default function UpdatePurchaseForm() {
       console.log(response.data);
       toast.success(response.data.message);
       setTimeout(() => {
-        navigate("/purchase");
+        router.push("/purchase");
       }, 1000);
     }
     catch (error) {
@@ -274,7 +274,7 @@ export default function UpdatePurchaseForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          navigate("/purchase");
+                          router.push("/purchase");
                         }}
                       >
                         Purchase List
@@ -290,7 +290,7 @@ export default function UpdatePurchaseForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/purchase");
+                      router.push("/purchase");
                     }}
                   >
                     Purchase List

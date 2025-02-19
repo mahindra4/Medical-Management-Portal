@@ -1,6 +1,6 @@
 import { SortableTable } from "../components/SortableTable";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { toast } from 'sonner';
 import { apiRoutes } from "../utils/apiRoutes";
@@ -39,7 +39,7 @@ const getPrescriptionData = async () => {
 
 
 export default function PrescriptionList() {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const [loading, setLoading] = useState(true);
   const [prescription, setPrescription] = useState([]);
   useEffect(() => {
@@ -78,11 +78,11 @@ export default function PrescriptionList() {
   };
   const handlePrescriptionDetail = async (e, id, idx) => {
     console.log("Prescription Detail", id);
-    navigate(`/prescription/${id}^${idx}`);
+    router.push(`/prescription/${id}^${idx}`);
   };
   const handlePrescriptionUpdate = async (id) => {
     console.log("Prescription Edit", id);
-    navigate(`/prescription/update/${id}`);
+    router.push(`/prescription/update/${id}`);
   };
   return (
     <>

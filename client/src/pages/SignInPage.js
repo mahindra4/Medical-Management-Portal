@@ -9,7 +9,7 @@ import {
   Checkbox,
   Button,
 } from "@material-tailwind/react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { toast } from "sonner";
 import { SyncLoadingScreen } from "../components/UI/LoadingScreen";
@@ -25,13 +25,13 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
 
-  const navigate = useNavigate();
+  const router = userouter.push();
   const [loginData, setLoginData] = useState({
     email: "",
   });
 
   if (userRole) {
-    navigate("/");
+    router.push("/");
   }
 
   const handleChange = (name, value) => {
@@ -44,12 +44,12 @@ export default function SignInPage() {
   const asyncTimeout = (delay, role) => {
     return new Promise(() => {
       setTimeout(() => {
-        if (role === "ADMIN") navigate("/admindashboard");
-        else if (role === "PARAMEDICAL") navigate("/pharmadashboard");
-        else if (role === "DOCTOR") navigate("/doctordashboard");
+        if (role === "ADMIN") router.push("/admindashboard");
+        else if (role === "PARAMEDICAL") router.push("/pharmadashboard");
+        else if (role === "DOCTOR") router.push("/doctordashboard");
         //TODO: Change this to patient dashboard
-        else if (role === "PATIENT") navigate("/prescription/patient");
-        else navigate("/");
+        else if (role === "PATIENT") router.push("/prescription/patient");
+        else router.push("/");
       }, delay);
     });
   };
@@ -92,7 +92,7 @@ export default function SignInPage() {
           "Please complete your profile to continue.",
           1800
         );
-        navigate(
+        router.push(
           `/${userRoleAssert === "PATIENT" ? "patient" : "staff"}/profile`
         );
       }

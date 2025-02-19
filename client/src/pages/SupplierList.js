@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from 'sonner';
 import axios from "axios";
 import { SyncLoadingScreen } from "../components/UI/LoadingScreen";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 const TABLE_HEAD = {
   id: "#",
@@ -34,7 +34,7 @@ const getSuppliersData = async () => {
 import Layout from "../layouts/PageLayout";
 import { apiRoutes } from "../utils/apiRoutes";
 export default function SupplierList() {
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,10 +47,10 @@ export default function SupplierList() {
     }
     fetchData();
   }, []);
-
+  const { id } = router.query; 
   const handleSupplierUpdate = (id) => {
     console.log("id : ", id);
-    if (id) navigate(`/supplier/update/${id}`);
+    if (id) router.push(`/supplier/${id}`);
   };
 
   const handleSupplierDelete = async (e, id) => {

@@ -12,13 +12,13 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 export default function AddScheduleForm() {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const [loading, setLoading] = useState(false);
   const [staff, setStaff] = useState([]);
   const [selectedStaff, setSelectedStaff] = useState({
@@ -101,7 +101,7 @@ export default function AddScheduleForm() {
       console.log("Schedule added successfully");
       toast.success(resData.message);
       setTimeout(() => {
-        navigate("/schedule");
+        router.push("/schedule");
       }, 1000);
     } catch (err) {
       console.log(`ERROR (add-schedule): ${err?.response?.data?.message}`);
@@ -132,7 +132,7 @@ export default function AddScheduleForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          navigate("/schedule");
+                          router.push("/schedule");
                         }}
                       >
                         See Schedule
@@ -148,7 +148,7 @@ export default function AddScheduleForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/schedule");
+                      router.push("/schedule");
                     }}
                   >
                     See Schedule

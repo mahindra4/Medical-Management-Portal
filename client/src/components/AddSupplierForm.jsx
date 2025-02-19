@@ -11,14 +11,14 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 
 export default function AddSupplierForm() {
-  const navigate = useNavigate();
+  const router = userouter.push();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     supplierName: "",
@@ -62,7 +62,7 @@ export default function AddSupplierForm() {
       console.log(response);
       toast.success("Supplier added successfully");
       setTimeout(() => {
-        navigate("/supplier");
+        router.push("/supplier");
       }, 1000);
     } catch (error) {
       console.error(`ERROR (add-supplier): ${error?.response?.data?.message}`);
@@ -93,7 +93,7 @@ export default function AddSupplierForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          navigate("/supplier");
+                          router.push("/supplier");
                         }}
                       >
                         Supplier List
@@ -109,7 +109,7 @@ export default function AddSupplierForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/supplier");
+                      router.push("/supplier");
                     }}
                   >
                     Supplier List

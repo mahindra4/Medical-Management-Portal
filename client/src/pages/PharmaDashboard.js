@@ -15,7 +15,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { GiMedicines } from "react-icons/gi";
 import Layout from "../layouts/PageLayout";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import {
   SyncLoadingScreen,
 } from "../components/UI/LoadingScreen";
@@ -104,7 +104,7 @@ const PharmaDashboard = () => {
   }, []);
 
   const { height, width } = useWindowDimensions();
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const chartConfigBar = {
     type: "bar",
@@ -238,7 +238,7 @@ const PharmaDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/medicine")}
+                  onClick={() => router.push("/medicine")}
                 >
                   See Medicine List
                 </button>
@@ -258,7 +258,7 @@ const PharmaDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/stock")}
+                  onClick={() => router.push("/stock")}
                 >
                   See Stock
                 </button>
@@ -278,7 +278,7 @@ const PharmaDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/purchase")}
+                  onClick={() => router.push("/purchase")}
                 >
                   See Purchase List
                 </button>
@@ -298,7 +298,7 @@ const PharmaDashboard = () => {
                 <button
                   className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
                   type="button"
-                  onClick={() => navigate("/supplier")}
+                  onClick={() => router.push("/supplier")}
                 >
                   See Supplier List
                 </button>

@@ -1,7 +1,7 @@
 import {toast} from "sonner";
 const setNavigateTimeout = async (navigate, path, delay) => {
   setTimeout(() => {
-    navigate(path);
+    router.push(path);
   }, delay);
 };
 const setToastTimeout = async (type, msg, delay) => {

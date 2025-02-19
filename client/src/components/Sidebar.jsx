@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import {
   UserCircleIcon,
   ClipboardDocumentListIcon,
@@ -53,7 +53,7 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
 
   const [open, setOpen] = useState(0);
   const [openMenu, setOpenMenu] = useState(false);
-  const navigate = useNavigate();
+  const router = userouter.push();
   useEffect(() => {
     setRoleArr(roleMap(userRole));
   }, [userRole]);
@@ -85,7 +85,7 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
     await logout();
     toast.success("Logged Out Successfully");
     setTimeout(() => {
-      navigate("/signin");
+      router.push("/signin");
     }, 1000);
   };
 
@@ -169,16 +169,16 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                           onClick={() => {
                             {
                               userRole === "PATIENT" &&
-                                navigate("/profile/patient");
+                                router.push("/profile/patient");
                             }
                             {
                               userRole === "ADMIN" &&
-                                navigate("/profile/admin");
+                                router.push("/profile/admin");
                             }
                             {
                               (userRole === "PARAMEDICAL" ||
                                 userRole === "DOCTOR") &&
-                                navigate("/profile/staff");
+                                router.push("/profile/staff");
                             }
                           }}
                           className="flex gap-2"
@@ -190,16 +190,16 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                           onClick={() => {
                             {
                               userRole === "PATIENT" &&
-                                navigate("/profile/patient/edit");
+                                router.push("/profile/patient/edit");
                             }
                             {
                               userRole === "ADMIN" &&
-                                navigate("/profile/admin/edit");
+                                router.push("/profile/admin/edit");
                             }
                             {
                               (userRole === "PARAMEDICAL" ||
                                 userRole === "DOCTOR") &&
-                                navigate("/profile/staff/edit");
+                                router.push("/profile/staff/edit");
                             }
                           }}
                           className="flex gap-2"
@@ -368,13 +368,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/stock")}
+                            onClick={() => router.push("/stock")}
                           >
                             Stock List
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/stock/out")}
+                            onClick={() => router.push("/stock/out")}
                           >
                             Out of Stock
                           </ListItem>
@@ -424,31 +424,31 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/medicine/category/add")}
+                            onClick={() => router.push("/medicine/category/add")}
                           >
                             Add Category
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/medicine/category")}
+                            onClick={() => router.push("/medicine/category")}
                           >
                             Category List
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/medicine/add")}
+                            onClick={() => router.push("/medicine/add")}
                           >
                             Add Medicine
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/medicine")}
+                            onClick={() => router.push("/medicine")}
                           >
                             Medicine List
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/medicine/expired")}
+                            onClick={() => router.push("/medicine/expired")}
                           >
                             Expired Medicines
                           </ListItem>
@@ -499,13 +499,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/purchase/add")}
+                            onClick={() => router.push("/purchase/add")}
                           >
                             Add Purchase
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/purchase")}
+                            onClick={() => router.push("/purchase")}
                           >
                             Purchase List
                           </ListItem>
@@ -555,13 +555,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/supplier/add")}
+                            onClick={() => router.push("/supplier/add")}
                           >
                             Add Supplier
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/supplier")}
+                            onClick={() => router.push("/supplier")}
                           >
                             Supplier List
                           </ListItem>
@@ -611,13 +611,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/patient/add")}
+                            onClick={() => router.push("/patient/add")}
                           >
                             Add Patient
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/patient")}
+                            onClick={() => router.push("/patient")}
                           >
                             Patient List
                           </ListItem>
@@ -667,13 +667,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/prescription/add")}
+                            onClick={() => router.push("/prescription/add")}
                           >
                             Add Prescription
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/prescription")}
+                            onClick={() => router.push("/prescription")}
                           >
                             Prescription List
                           </ListItem>
@@ -723,13 +723,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/staff/add")}
+                            onClick={() => router.push("/staff/add")}
                           >
                             Add Staff
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/staff")}
+                            onClick={() => router.push("/staff")}
                           >
                             Staff List
                           </ListItem>
@@ -779,13 +779,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/schedule/add")}
+                            onClick={() => router.push("/schedule/add")}
                           >
                             Add Schedule
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/schedule")}
+                            onClick={() => router.push("/schedule")}
                           >
                             Schedule List
                           </ListItem>
@@ -835,13 +835,13 @@ const Sidebar = ({ collapseSetter, hoverSetter, largeScreenSetter }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/admin/add")}
+                            onClick={() => router.push("/admin/add")}
                           >
                             Add Admin
                           </ListItem>
                           <ListItem
                             className="ml-9"
-                            onClick={() => navigate("/admin")}
+                            onClick={() => router.push("/admin")}
                           >
                             Admin List
                           </ListItem>

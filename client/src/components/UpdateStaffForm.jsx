@@ -11,7 +11,7 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
-import { useNavigate, useParams } from "react-router-dom";
+import { useRouter, useParams } from "next/router";
 import Layout from "../layouts/PageLayout";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
@@ -19,7 +19,7 @@ import { setNavigateTimeout, setToastTimeout } from "../utils/customTimeout";
 
 export function UpdateStaffForm() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = userouter.push();
 
   const departments = ["AYURVEDIC", "GYNECOLOGY", "HOMEOPATHY"];
   const roles = ["Doctor", "Paramedical"];
@@ -103,7 +103,10 @@ export function UpdateStaffForm() {
         withCredentials: true,
       });
       setToastTimeout("success", "Staff updated successfully", 200);
-      setNavigateTimeout(navigate, "/staff", 1000);
+      setTimeout(() => {
+        router.push("/staff");
+      }, 1000);
+      
     } catch (error) {
       console.error(error);
       setToastTimeout(
@@ -139,7 +142,7 @@ export function UpdateStaffForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          navigate("/staff");
+                          router.push("/staff");
                         }}
                       >
                         Staff List
@@ -155,7 +158,7 @@ export function UpdateStaffForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/staff");
+                      router.push("/staff");
                     }}
                   >
                     Staff List
