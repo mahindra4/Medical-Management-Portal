@@ -11,14 +11,14 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useParams, useRouter } from "next/router";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 import Layout from "../layouts/PageLayout";
 const UpdateCategoryForm = () => {
   const { id } = useParams();
-  const router = userouter.push();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -94,7 +94,7 @@ const UpdateCategoryForm = () => {
       // console.log(response);
       toast.success("Medicine Category updated successfully");
       setTimeout(() => {
-        router.push("/medicine/category");
+        navigate("/medicine/category");
       }, 1000);
     } catch (error) {
       console.error(
@@ -128,7 +128,7 @@ const UpdateCategoryForm = () => {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          router.push("/medicine/category");
+                          navigate("/medicine/category");
                         }}
                       >
                         Category List
@@ -144,7 +144,7 @@ const UpdateCategoryForm = () => {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      router.push("/medicine/category");
+                      navigate("/medicine/category");
                     }}
                   >
                     Category List

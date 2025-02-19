@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import {
   UserCircleIcon,
   ClipboardDocumentListIcon,
@@ -57,7 +57,7 @@ const Layout = ({ children }) => {
   const [openMenu, setOpenMenu] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-  const router = userouter.push();
+  const navigate = useNavigate();
 
   const handleOpen = (value) => {
     setOpen(open === value ? 0 : value);
@@ -71,7 +71,7 @@ const Layout = ({ children }) => {
     await logout();
     toast.success("Logged Out Successfully");
     setTimeout(() => {
-      router.push("/signin");
+      navigate("/signin");
     }, 1000);
   };
 
@@ -202,9 +202,9 @@ const Layout = ({ children }) => {
                     <MenuList { ... triggers }>
                       <MenuItem 
                         onClick={() => {
-                          {userRole === "PATIENT" && router.push("/profile/patient")}
-                          {userRole === "ADMIN" && router.push("/profile/admin")}
-                          {(userRole === "PARAMEDICAL" || userRole === "DOCTOR") && router.push("/profile/staff")}
+                          {userRole === "PATIENT" && navigate("/profile/patient")}
+                          {userRole === "ADMIN" && navigate("/profile/admin")}
+                          {(userRole === "PARAMEDICAL" || userRole === "DOCTOR") && navigate("/profile/staff")}
                         }} 
                         className="flex gap-2"
                       >
@@ -213,9 +213,9 @@ const Layout = ({ children }) => {
                       </MenuItem>
                       <MenuItem 
                         onClick={() => {
-                            {userRole === "PATIENT" && router.push("/profile/patient/edit")}
-                            {userRole === "ADMIN" && router.push("/profile/admin/edit")}
-                            {(userRole === "PARAMEDICAL" || userRole === "DOCTOR") && router.push("/profile/staff/edit")}
+                            {userRole === "PATIENT" && navigate("/profile/patient/edit")}
+                            {userRole === "ADMIN" && navigate("/profile/admin/edit")}
+                            {(userRole === "PARAMEDICAL" || userRole === "DOCTOR") && navigate("/profile/staff/edit")}
                         }} 
                         className="flex gap-2"
                       >
@@ -383,13 +383,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["STOCK_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/stock")}
+                            onClick={() => navigate("/stock")}
                           >
                             Stock List
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["OUT_OF_STOCK"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/stock/out")}
+                            onClick={() => navigate("/stock/out")}
                           >
                             Out of Stock
                           </ListItem>}
@@ -442,31 +442,31 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_CATEGORY"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/medicine/category/add")}
+                            onClick={() => navigate("/medicine/category/add")}
                           >
                             Add Category
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["CATEGORY_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/medicine/category")}
+                            onClick={() => navigate("/medicine/category")}
                           >
                             Category List
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["ADD_MEDICINE"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/medicine/add")}
+                            onClick={() => navigate("/medicine/add")}
                           >
                             Add Medicine
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["MEDICINE_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/medicine")}
+                            onClick={() => navigate("/medicine")}
                           >
                             Medicine List
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["EXPIRED_MEDICINE"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/medicine/expired")}
+                            onClick={() => navigate("/medicine/expired")}
                           >
                             Expired Medicines
                           </ListItem>}
@@ -517,13 +517,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_PURCHASE"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/purchase/add")}
+                            onClick={() => navigate("/purchase/add")}
                           >
                             Add Purchase
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["PURCHASE_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/purchase")}
+                            onClick={() => navigate("/purchase")}
                           >
                             Purchase List
                           </ListItem>}
@@ -573,13 +573,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_SUPPLIER"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/supplier/add")}
+                            onClick={() => navigate("/supplier/add")}
                           >
                             Add Supplier
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["SUPPLIER_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/supplier")}
+                            onClick={() => navigate("/supplier")}
                           >
                             Supplier List
                           </ListItem>}
@@ -629,13 +629,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_PATIENT"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/patient/add")}
+                            onClick={() => navigate("/patient/add")}
                           >
                             Add Patient
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["PATIENT_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/patient")}
+                            onClick={() => navigate("/patient")}
                           >
                             Patient List
                           </ListItem>}
@@ -685,13 +685,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_PRESCRIPTION"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/prescription/add")}
+                            onClick={() => navigate("/prescription/add")}
                           >
                             Add Prescription
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["PRESCRIPTION_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/prescription")}
+                            onClick={() => navigate("/prescription")}
                           >
                             Prescription List
                           </ListItem>}
@@ -741,13 +741,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_STAFF"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/staff/add")}
+                            onClick={() => navigate("/staff/add")}
                           >
                             Add Staff
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["STAFF_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/staff")}
+                            onClick={() => navigate("/staff")}
                           >
                             Staff List
                           </ListItem>}
@@ -797,13 +797,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_SCHEDULE"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/schedule/add")}
+                            onClick={() => navigate("/schedule/add")}
                           >
                             Add Schedule
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["SCHEDULE_LIST"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/schedule")}
+                            onClick={() => navigate("/schedule")}
                           >
                             Schedule List
                           </ListItem>}
@@ -853,13 +853,13 @@ const Layout = ({ children }) => {
                         <List className="p-0" style={{ color: "#f1ffea" }}>
                         {hasRequiredRole(roleArr, ["ADD_ADMIN"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/admin/add")}
+                            onClick={() => navigate("/admin/add")}
                           >
                             Add Admin
                           </ListItem>}
                           {hasRequiredRole(roleArr, ["ADD_ADMIN"]) && <ListItem
                             className="ml-9"
-                            onClick={() => router.push("/admin")}
+                            onClick={() => navigate("/admin")}
                           >
                             Admin List
                           </ListItem>}

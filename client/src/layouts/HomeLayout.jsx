@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-scroll";
 import { useAuthContext } from "../hooks/useAuthContext";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 const HomeLayout = ({ children }) => {
   const { userRole } = useAuthContext();
   const { logout } = useLogout();
-  const router = userouter.push();
+  const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
@@ -31,7 +31,7 @@ const HomeLayout = ({ children }) => {
     await logout();
     toast.success("Logged Out Successfully");
     setTimeout(() => {
-      router.push("/signin");
+      navigate("/signin");
     }, 1000);
   };
 
@@ -48,15 +48,15 @@ const HomeLayout = ({ children }) => {
 
   const handleDashboardClick = () => {
     if (userRole === "ADMIN") {
-      router.push("/admindashboard");
+      navigate("/admindashboard");
     } else if (userRole === "PARAMEDICAL") {
-      router.push("/pharmadashboard");
+      navigate("/pharmadashboard");
     } else if (userRole === "DOCTOR") {
-      router.push("/doctordashboard");
+      navigate("/doctordashboard");
     } else if (userRole === "PATIENT") {
-      router.push("/schedule/doctor");
+      navigate("/schedule/doctor");
     } else {
-      router.push("/");
+      navigate("/");
     }
   };
 
@@ -180,7 +180,7 @@ const HomeLayout = ({ children }) => {
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-300 ease-in-out font-semibold"
                   // onClick={openForm}
-                  onClick={() => router.push("/signin")}
+                  onClick={() => navigate("/signin")}
                 >
                   Login
                 </button>
@@ -294,7 +294,7 @@ const HomeLayout = ({ children }) => {
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-300 ease-in-out font-semibold"
                   // onClick={openForm}
-                  onClick={() => router.push("/signin")}
+                  onClick={() => navigate("/signin")}
                 >
                   Login
                 </button>

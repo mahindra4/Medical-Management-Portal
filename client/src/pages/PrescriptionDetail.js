@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/router";
+import { useParams, useNavigate } from "react-router-dom";
 import { apiRoutes } from "../utils/apiRoutes";
 import axios from "axios";
 import html2pdf from "html2pdf.js";
@@ -19,7 +19,7 @@ const TABLE_HEAD = ["Medicine", "Dosage", "Quantity"];
 
 const PrescriptionDetail = () => {
   const { id } = useParams();
-  const router = userouter.push();
+  const navigate = useNavigate();
   console.log(id);
   const params = id.split("^");
   const prescriptionId = params[0];
@@ -111,7 +111,7 @@ const PrescriptionDetail = () => {
                 </Typography>
               </div>
               <div className="flex gap-x-2 h-10">
-                <Button size="md" ripple={true} onClick={()=>router.push(`/prescription/update/${prescriptionId}`)}>
+                <Button size="md" ripple={true} onClick={()=>navigate(`/prescription/update/${prescriptionId}`)}>
                   Edit
                 </Button>
                 <Button
@@ -125,7 +125,7 @@ const PrescriptionDetail = () => {
                 <Button
                   size="md"
                   ripple={true}
-                  onClick={() => router.push("/prescription")}
+                  onClick={() => navigate("/prescription")}
                 >
                   Close
                 </Button>

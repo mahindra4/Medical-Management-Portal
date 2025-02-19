@@ -11,14 +11,14 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { useAuthContext } from "../hooks/useAuthContext";
 import Cookies from "js-cookie";
 
 export default function CompleteProfilePatient() {
-  const router = userouter.push();
+  const navigate = useNavigate();
   const { userName, userEmail, dispatch } = useAuthContext();
   console.log(userName, userEmail)
   const [formData, setFormData] = useState({
@@ -79,7 +79,7 @@ export default function CompleteProfilePatient() {
         })
 
         setTimeout(() => {
-          router.push("/prescription/patient");
+          navigate("/prescription/patient");
         }, 1000);
       } else {
         console.error(

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -52,7 +52,7 @@ const getScheduleData = async (userEmail) => {
 
 export default function StaffProfile({ edit = false }) {
   const { userEmail } = useAuthContext();
-  const router = userouter.push();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { logout } = useLogout();
   const [open, setOpen] = useState(false);
@@ -136,7 +136,7 @@ export default function StaffProfile({ edit = false }) {
       );
       toast.success(response.data.message);
       setPage(!page);
-      router.push("/profile/staff");
+      navigate("/profile/staff");
     } catch (error) {
       console.error(`ERROR: ${error?.response?.data?.message}`);
       toast.error(
@@ -158,7 +158,7 @@ export default function StaffProfile({ edit = false }) {
         const data = response?.data;
         if(data && data.ok) {
           await logout();
-          router.push("/signin");
+          navigate("/signin");
           console.log(data?.message);
           toast.success(data?.message);
         } else {
@@ -412,7 +412,7 @@ export default function StaffProfile({ edit = false }) {
                     size="md"
                     onClick={() => {
                       setPage(!page);
-                      router.push("/profile/staff");
+                      navigate("/profile/staff");
                     }}
                   >
                     Back
@@ -440,7 +440,7 @@ export default function StaffProfile({ edit = false }) {
                     size="md"
                     onClick={() => {
                       setPage(!page);
-                      router.push("/profile/staff/edit");
+                      navigate("/profile/staff/edit");
                     }}
                   >
                     Edit Profile

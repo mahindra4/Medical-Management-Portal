@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { SyncLoadingScreen } from "../components/UI/LoadingScreen";
 import {toast} from 'sonner';
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 const TABLE_HEAD = {
   id: "#",
@@ -31,7 +31,7 @@ const getMedicinesData = async () => {
 import Layout from "../layouts/PageLayout";
 import { apiRoutes } from "../utils/apiRoutes";
 export default function MedicineList() {
-  const router = userouter.push();
+  const navigate = useNavigate();
 
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,10 +66,10 @@ export default function MedicineList() {
       toast.error(err?.response?.data?.message || 'Failed to delete Medicine');
     }
   };
-  const { id } = router.query; 
+
   const handleMedicineUpdate = (id) => {
     console.log("id : ", id);
-    if (id) router.push(`/medicine/${id}`);
+    if (id) navigate(`/medicine/update/${id}`);
   };
 
   return (

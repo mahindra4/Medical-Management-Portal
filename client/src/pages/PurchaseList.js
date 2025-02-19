@@ -5,7 +5,7 @@ import axios from "axios";
 import {
   SyncLoadingScreen,
 } from "../components/UI/LoadingScreen";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 const TABLE_HEAD = {
   id: "#",
@@ -33,7 +33,7 @@ const getPurchaseData = async () => {
 import Layout from "../layouts/PageLayout";
 import { apiRoutes } from "../utils/apiRoutes";
 export default function PurchaseList() {
-  const router = userouter.push();
+  const navigate = useNavigate();
   const [purchase, setPurchase] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -71,12 +71,12 @@ export default function PurchaseList() {
 
   const handlePurchaseDetail = async(e, id, idx) => {
     console.log("Purchase Detail", id);
-    router.push(`/purchase/${id}`);
+    navigate(`/purchase/${id}`);
   }
-  const { id } = router.query; 
+
   const handlePurchaseUpdate = (id) => {
     console.log("id : ", id);
-    if (id) router.push(`/purchase/${id}`);
+    if (id) navigate(`/purchase/update/${id}`);
   };
   return (
     <>

@@ -13,14 +13,14 @@ import {
   IconButton,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 
 export function AddPurchaseForm() {
-  const router = userouter.push();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     purchaseDate: "",
@@ -188,7 +188,7 @@ export function AddPurchaseForm() {
       console.log("add purchase submit response = ", response);
       toast.success("Purchase added successfully");
       setTimeout(() => {
-        router.push("/purchase");
+        navigate("/purchase");
       }, 1000);
     } catch (error) {
       console.log(error);
@@ -228,7 +228,7 @@ export function AddPurchaseForm() {
                         className="flex items-center gap-3"
                         size="md"
                         onClick={() => {
-                          router.push("/purchase");
+                          navigate("/purchase");
                         }}
                       >
                         Purchase List
@@ -244,7 +244,7 @@ export function AddPurchaseForm() {
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      router.push("/purchase");
+                      navigate("/purchase");
                     }}
                   >
                     Purchase List

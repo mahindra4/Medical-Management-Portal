@@ -12,13 +12,13 @@ import {
     Select as MaterialSelect
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useRouter, useParams } from "next/router";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 
 export function UpdateMedicineForm() {
-    const router = userouter.push();
+    const navigate = useNavigate();
     const { id } = useParams();
 
     const [loading, setLoading] = useState(false);
@@ -132,7 +132,7 @@ export function UpdateMedicineForm() {
             console.log(response);
             toast.success('Medicine updated successfully');
             setTimeout(() => {
-                router.push("/medicine");
+                navigate("/medicine");
             }, 1000);
         } catch (error) {
             console.error(error);
@@ -156,7 +156,7 @@ export function UpdateMedicineForm() {
                                         className="flex items-center gap-3"
                                         size="md"
                                         onClick={() => {
-                                            router.push("/medicine");
+                                            navigate("/medicine");
                                         }}
                                     >
                                         Medicine List
@@ -172,7 +172,7 @@ export function UpdateMedicineForm() {
                                 className="flex items-center gap-3"
                                 size="md"
                                 onClick={() => {
-                                    router.push("/medicine");
+                                    navigate("/medicine");
                                 }}
                             >
                                 Medicine List

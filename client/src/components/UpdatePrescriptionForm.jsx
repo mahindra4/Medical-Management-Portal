@@ -16,7 +16,7 @@ import {
   Textarea,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useRouter, useParams } from "next/router";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { useAuthContext } from "../hooks/useAuthContext";
@@ -25,7 +25,7 @@ import Layout from "../layouts/PageLayout";
 
 export default function UpdatePrescriptionForm() {
   const { id } = useParams();
-  const router = userouter.push();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { userEmail } = useAuthContext();
   const [formData, setFormData] = useState({
@@ -283,7 +283,7 @@ export default function UpdatePrescriptionForm() {
       console.log(response.data);
       toast.success(response.data.message);
       setTimeout(() => {
-        router.push("/prescription");
+        navigate("/prescription");
       }, 1000);
     } catch (error) {
       console.error(
@@ -338,7 +338,7 @@ export default function UpdatePrescriptionForm() {
                   className="flex items-center gap-3"
                   size="md"
                   onClick={() => {
-                    router.push("/prescription");
+                    navigate("/prescription");
                   }}
                 >
                   Prescription List

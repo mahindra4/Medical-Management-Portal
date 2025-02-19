@@ -1,6 +1,6 @@
 import React from 'react'
-import { useRouter } from "next/router";
-//import unauthorizedImage from "../assets/img/unauthorized.jpg";
+import { useNavigate } from "react-router-dom";
+import unauthorizedImage from "../assets/img/unauthorized.jpg";
 import { useLogout } from '../hooks/useLogout';
 import { toast } from "sonner";
 import { useAuthContext } from '../hooks/useAuthContext';
@@ -9,31 +9,31 @@ const unauthorizedText = "Sorry! You are not authorized to access this page. Ple
 const UnauthorizedPage = () => {
     const { userRole } = useAuthContext();
     const { logout } = useLogout();
-    const router = userouter.push();
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         await logout();
         toast.success("Logged Out Successfully");
         setTimeout(() => {
-            router.push("/signin");
+            navigate("/signin");
         }, 1000);
     };
 
     const handleDashboard = () => {
-        if (userRole === "ADMIN") router.push("/admindashboard");
-        else if (userRole === "PARAMEDICAL") router.push("/pharmadashboard");
-        else if (userRole === "DOCTOR") router.push("/doctordashboard");
+        if (userRole === "ADMIN") navigate("/admindashboard");
+        else if (userRole === "PARAMEDICAL") navigate("/pharmadashboard");
+        else if (userRole === "DOCTOR") navigate("/doctordashboard");
 
         //TODO: Change this to patient dashboard
-        else if (userRole === "PATIENT") router.push("/schedule/doctor");
-        else router.push("/");
+        else if (userRole === "PATIENT") navigate("/schedule/doctor");
+        else navigate("/");
     };
 
     return (
         <>
             <div className='md:flex md:flex-row flex flex-col'>
                 <img
-                    src="/img/unauthorized.jpg"
+                    src={unauthorizedImage}
                     alt="Unauthorized Image"
                     className='h-1/2 w-1/2' />
                 <div className='flex flex-col justify-center p-10'>

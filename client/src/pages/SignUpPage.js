@@ -11,7 +11,7 @@ import {
   Select,
   Option,
 } from "@material-tailwind/react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { apiRoutes } from "../utils/apiRoutes";
 import axios from "axios";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ export default function SignUpPage() {
   });
   const [loading, setLoading] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const router = userouter.push();
+  const navigate = useNavigate();
   const handleChange = (name, value) => {
     setRegistrationData((prevData) => ({
       ...prevData,
@@ -40,7 +40,7 @@ export default function SignUpPage() {
   const asyncTimeout = (delay, redirectUrl) => {
     return new Promise(() => {
       setTimeout(() => {
-        router.push(redirectUrl);
+        navigate(redirectUrl);
       }, delay);
     });
   };
@@ -48,7 +48,7 @@ export default function SignUpPage() {
     const user = { ...registrationData };
     console.log(user);
     if (user.role !== "PATIENT") {
-      // router.push("/staff/profile");
+      // navigate("/staff/profile");
       const response = await axios.post(`${apiRoutes.mail}/pending`, user);
       if (response.data.ok) {
         toast.success(response.data.message);

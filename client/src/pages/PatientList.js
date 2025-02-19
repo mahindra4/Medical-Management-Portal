@@ -2,7 +2,7 @@ import { SortableTable } from "../components/SortableTable";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from 'sonner';
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import {
   SyncLoadingScreen,
 } from "../components/UI/LoadingScreen";
@@ -42,7 +42,7 @@ import Layout from "../layouts/PageLayout";
 import { apiRoutes } from "../utils/apiRoutes";
 
 export default function PatientList() {
-  const router = userouter.push();
+  const navigate = useNavigate();
 
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,10 +55,10 @@ export default function PatientList() {
     };
     fetchPatientList();
   }, []);
-  const { id } = router.query; 
+
   const handlePatientUpdate = (id) => {
     console.log("id : ", id);
-    if (id) router.push(`/patient/${id}`);
+    if (id) navigate(`/patient/update/${id}`);
   };
 
   const handlePatientDelete = async (e, id) => {

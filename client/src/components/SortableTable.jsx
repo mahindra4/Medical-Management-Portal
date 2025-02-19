@@ -37,7 +37,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState, useRef } from "react";
 import Pagination from "./Pagination";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 import DialogBox from "./DialogBox";
 
@@ -62,7 +62,7 @@ export function SortableTable({
   const [open, setOpen] = useState(false);
   const [deletedRecordId, setDeletedRecordId] = useState(null);
 
-  const router = userouter.push();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [paginatedData, setPaginatedData] = useState([]);
@@ -276,7 +276,7 @@ export function SortableTable({
                     className="flex items-center gap-3"
                     size="sm"
                     onClick={() => {
-                      router.push(addLink);
+                      navigate(addLink);
                     }}
                   >
                     <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> {text}
@@ -297,7 +297,7 @@ export function SortableTable({
                 className="flex items-center gap-3"
                 size="sm"
                 onClick={() => {
-                  router.push(addLink);
+                  navigate(addLink);
                 }}
               >
                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> {text}

@@ -3,11 +3,11 @@ import { HashLoadingScreen, SyncLoadingScreen } from '../UI/LoadingScreen';
 import { useAuthContext } from '../../hooks/useAuthContext';
 import roleMap from '../../utils/rolesMap';
 import UnauthorizedPage from '../../pages/UnauthorizedPage';
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
 
 const ProtectedRoute = ({ children, routeName }) => {
-    const router = userouter.push();
+    const navigate = useNavigate();
     const { userRole, userProfileComplete } = useAuthContext();
     const [roleArr, setRoleArr] = useState([]);
 
@@ -37,7 +37,7 @@ const ProtectedRoute = ({ children, routeName }) => {
                 //     } else {
                 //         console.log("YOU ARE ON WRONG PROFILE");
                 //         toast.error("Please complete your profile.");
-                //         router.push(`/profile/${userRole === "PATIENT" ? "patient" : "staff"}`);
+                //         navigate(`/profile/${userRole === "PATIENT" ? "patient" : "staff"}`);
                 //     } 
                 // }
 
@@ -47,12 +47,12 @@ const ProtectedRoute = ({ children, routeName }) => {
                     else {
                         toast.error("Please complete your profile to continue.");
                         console.log("please complete your profile");
-                        router.push(`/${userRole === "PATIENT" ? "patient" : "staff"}/profile`);
+                        navigate(`/${userRole === "PATIENT" ? "patient" : "staff"}/profile`);
                     }
                 }
             } else {
                 //TODO: Show warning when non logged in user trying to access
-                router.push("/signin");
+                navigate("/signin");
             }
         }, 1000);
         return () => {
@@ -61,7 +61,7 @@ const ProtectedRoute = ({ children, routeName }) => {
     }, [userRole]);
 
     if (!roleArr.length) {
-        // router.push("/signin");
+        // navigate("/signin");
         return <SyncLoadingScreen />;
     }
 
