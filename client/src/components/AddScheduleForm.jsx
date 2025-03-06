@@ -32,10 +32,16 @@ export default function AddScheduleForm() {
     day: "",
     shift: "",
   });
+  
+  const SELECTED_STAFF = "selectedStaffSchedule"
+  const FORM_DATA = "formDataSchedule"
 
   const handleStaffChange = (selectedStaff) => {
     console.log("selectedstaff : ", selectedStaff);
-    setSelectedStaff(selectedStaff);
+    setSelectedStaff((prevStaff)=>{
+      sessionStorage.setItem(SELECTED_STAFF,JSON.stringify(selectedStaff));
+      return selectedStaff;
+    });
     // setFormData((prevData) => ({
     //   ...prevData,
     //   staff: selectedStaff.value
@@ -65,6 +71,14 @@ export default function AddScheduleForm() {
     () => async () => {
       setLoading(true);
       await fetchStaffList();
+      const selected_staff = sessionStorage.getItem(SELECTED_STAFF)
+      if(selected_staff){
+        setSelectedStaff(JSON.parse(selected_staff))
+      }
+      const form_data = sessionStorage.getItem(FORM_DATA)
+      if(form_data){
+        setFormData(JSON.parse(form_data))
+      }
       setLoading(false);
     },
     []
@@ -74,10 +88,14 @@ export default function AddScheduleForm() {
     // console.log(e.target);
     // const { name, value } = e.target;
     // console.log(name, value);
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => {
+      const updatedForm = {
+        ...prevData,
+        [name]: value,
+      }
+      sessionStorage.setItem(FORM_DATA,JSON.stringify(updatedForm))
+      return updatedForm
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -100,9 +118,11 @@ export default function AddScheduleForm() {
 
       console.log("Schedule added successfully");
       toast.success(resData.message);
+      sessionStorage.removeItem(FORM_DATA)
+      sessionStorage.removeItem(SELECTED_STAFF)
       setTimeout(() => {
         navigate("/schedule");
-      }, 1000);
+      }, 100);
     } catch (err) {
       console.log(`ERROR (add-schedule): ${err?.response?.data?.message}`);
       toast.error(err?.response?.data?.message);

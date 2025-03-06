@@ -294,6 +294,13 @@ export default function AddPrescriptionForm() {
       });
       console.log(response.data);
       toast.success(response.data.message);
+
+      sessionStorage.removeItem(FORM_STORAGE_KEY) 
+      sessionStorage.removeItem(HANDLE_INPUT_CHANGE_KEY) 
+      sessionStorage.removeItem(HANDLE_SELECTED_MEDICINE) 
+      sessionStorage.removeItem(HANDLE_PATIENT_EMAIL) 
+      sessionStorage.removeItem(HANDLE_DOCTOR_EMAIL) 
+
       setTimeout(() => {
         navigate("/prescription");
       }, 1000);
@@ -307,7 +314,6 @@ export default function AddPrescriptionForm() {
     }
     setLoading(false);
 
-    sessionStorage.clear()
   };
 
   const handleAddRow = () => {
