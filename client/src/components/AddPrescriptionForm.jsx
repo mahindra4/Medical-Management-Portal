@@ -60,6 +60,8 @@ export default function AddPrescriptionForm() {
   const [medicines, setMedicines] = useState([]);
   const [selectedMedicine, setSelectedMedicine] = useState("");
 
+  const FORM_STORAGE_KEY = "prescriptionFormData";
+
   useEffect(
     () => async () => {
       // Fetch doctors list when the component mounts
@@ -68,6 +70,10 @@ export default function AddPrescriptionForm() {
       await fetchAvailableStock();
       await fetchDoctors();
       await fetchPatients();
+      const savedData = sessionStorage.getItem(FORM_STORAGE_KEY)
+      if(savedData){
+        setFormData(JSON.parse(savedData)) 
+      }
       setLoading(false);
     },
     []
@@ -127,7 +133,10 @@ export default function AddPrescriptionForm() {
 
   const handleInputChange = (key, index, value) => {
     // console.log(dataArray)
-    console.log(key, index, value);
+    console.log('handle Input Change')
+    console.log(`key: ${key}`);
+    console.log(`index: ${index}`);
+    console.log(`value: ${value}`);
     const updatedArray = [...dataArray];
     console.log(updatedArray);
     updatedArray[index][key] = value;
@@ -135,6 +144,7 @@ export default function AddPrescriptionForm() {
   };
 
   const handleDoctorChange = (selectedDoctor) => {
+    console.log('handle Doctor Change')
     console.log(selectedDoctor);
     setSelectedDoctor(selectedDoctor);
     setFormData((prevData) => ({
@@ -143,6 +153,7 @@ export default function AddPrescriptionForm() {
     }));
   };
   const handlePatientChange = (selectedPatient) => {
+    console.log('handle Patient Change')
     console.log(selectedPatient);
     setSelectedPatient(selectedPatient);
     setFormData((prevData) => ({
@@ -151,6 +162,7 @@ export default function AddPrescriptionForm() {
     }));
   };
   const handleMedicineChange = (selectedMedicine, index) => {
+    console.log('handle Medicine Change')
     console.log(selectedMedicine);
     setSelectedMedicine(selectedMedicine);
     setDataArray((prevData) => {
@@ -162,16 +174,29 @@ export default function AddPrescriptionForm() {
   };
 
   const handleChange = (name, value) => {
+    console.log('handle Change')
     // console.log(e.target);
     // const { name, value } = e.target;
     console.log(name, value);
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    const updatedData = {
+      ...formData,
+      [name]: value
+    }
+    console.log('updatedData')
+    console.log(updatedData)
+
+    // setFormData((prevData) => ({
+    //   ...prevData,
+    //   [name]: value,
+    // }));
+    setFormData(updatedData);
+    sessionStorage.setItem(FORM_STORAGE_KEY,JSON.stringify(updatedData))
+
   };
 
   const handleSubmit = async (e) => {
+    console.log('handle Submit')
     e.preventDefault();
     // Here you can handle the submission of the form
     const checkupListEntry = {
@@ -243,6 +268,7 @@ export default function AddPrescriptionForm() {
   };
 
   const handleAddRow = () => {
+    console.log('handle Add Row')
     setDataArray((prevData) => [
       ...prevData,
       { name: "", dosage: "", quantity: "" },
@@ -250,6 +276,7 @@ export default function AddPrescriptionForm() {
   };
 
   const handleDeleteRow = (index) => {
+    console.log('handle Delete Row')
     if (dataArray.length === 1) {
       toast.error("Atleast one Medicine is required in the prescription");
       return;

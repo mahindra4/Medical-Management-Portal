@@ -108,7 +108,6 @@ const getCheckupList = async (req, res, next) => {
       },
     },
   });
-
   // for (const checkup of checkupList) {
   //   console.log(formatTimeFromISO(checkup.date));
   // }
