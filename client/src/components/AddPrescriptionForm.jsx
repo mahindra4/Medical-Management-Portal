@@ -61,6 +61,10 @@ export default function AddPrescriptionForm() {
   const [selectedMedicine, setSelectedMedicine] = useState("");
 
   const FORM_STORAGE_KEY = "prescriptionFormData";
+  const HANDLE_INPUT_CHANGE_KEY = "handleInputChange"
+  const HANDLE_SELECTED_MEDICINE = "handleSelectedMedicine"
+  const HANDLE_PATIENT_EMAIL = "handlePatientEmail"
+  const HANDLE_DOCTOR_EMAIL = "handleDoctorEmail"
 
   useEffect(
     () => async () => {
@@ -70,10 +74,36 @@ export default function AddPrescriptionForm() {
       await fetchAvailableStock();
       await fetchDoctors();
       await fetchPatients();
-      const savedData = sessionStorage.getItem(FORM_STORAGE_KEY)
-      if(savedData){
-        setFormData(JSON.parse(savedData)) 
+      const form_data = sessionStorage.getItem(FORM_STORAGE_KEY)
+      const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL)
+      const doctor_email = sessionStorage.getItem(HANDLE_DOCTOR_EMAIL)
+
+      if(form_data){
+        setFormData(JSON.parse(form_data))
       }
+      if(patient_email){
+        setSelectedPatient(JSON.parse(patient_email))
+      }
+
+      if(doctor_email){
+        setSelectedDoctor(JSON.parse(doctor_email))
+      }
+      // if(savedData){
+      //   setFormData(JSON.parse(savedData)) 
+      //   console.log(JSON.parse(savedData))
+      // }
+
+      const medical_data = sessionStorage.getItem(HANDLE_INPUT_CHANGE_KEY)
+      if(medical_data){
+        setDataArray(JSON.parse(medical_data))
+      }
+
+      // const medicine_data = sessionStorage.getItem(HANDLE_SELECTED_MEDICINE)
+      // if(medicine_data){
+      //   // console.log(JSON.parse(medicine_data))
+      //   setDataArray(JSON.parse(medicine_data))
+      // } 
+
       setLoading(false);
     },
     []
@@ -141,6 +171,10 @@ export default function AddPrescriptionForm() {
     console.log(updatedArray);
     updatedArray[index][key] = value;
     setDataArray(updatedArray);
+    console.log(updatedArray)
+
+    sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY,JSON.stringify(updatedArray))
+
   };
 
   const handleDoctorChange = (selectedDoctor) => {
@@ -151,6 +185,7 @@ export default function AddPrescriptionForm() {
       ...prevData,
       doctor: selectedDoctor.value,
     }));
+    sessionStorage.setItem(HANDLE_DOCTOR_EMAIL,JSON.stringify(selectedDoctor))
   };
   const handlePatientChange = (selectedPatient) => {
     console.log('handle Patient Change')
@@ -160,15 +195,21 @@ export default function AddPrescriptionForm() {
       ...prevData,
       email: selectedPatient.value,
     }));
+    sessionStorage.setItem(HANDLE_PATIENT_EMAIL,JSON.stringify(selectedPatient))
   };
   const handleMedicineChange = (selectedMedicine, index) => {
     console.log('handle Medicine Change')
     console.log(selectedMedicine);
     setSelectedMedicine(selectedMedicine);
+
+    
+    // console.log('------------------------')
+
     setDataArray((prevData) => {
       const updatedArray = [...prevData];
       updatedArray[index].name = selectedMedicine;
       console.log(updatedArray);
+      sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY,JSON.stringify(updatedArray))
       return updatedArray;
     });
   };
@@ -265,6 +306,8 @@ export default function AddPrescriptionForm() {
       );
     }
     setLoading(false);
+
+    sessionStorage.clear()
   };
 
   const handleAddRow = () => {
