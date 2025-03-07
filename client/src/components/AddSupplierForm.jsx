@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   CardBody,
   Input,
@@ -31,12 +31,31 @@ export default function AddSupplierForm() {
     address2: "",
   });
 
+  useEffect(
+    ()=>{
+      const form_data = sessionStorage.getItem(ADD_SUPPLIER)
+      console.log(form_data)
+      if(form_data){
+        setFormData(JSON.parse(form_data))
+      }
+    },
+    []
+  );
+
+  const ADD_SUPPLIER = "addSuplier"
+
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => {
+      const updatedForm = {
+        ...prevData,
+        [name]: value,
+      }
+      sessionStorage.setItem(ADD_SUPPLIER,JSON.stringify(updatedForm));
+      return updatedForm
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -61,9 +80,10 @@ export default function AddSupplierForm() {
       });
       console.log(response);
       toast.success("Supplier added successfully");
+      sessionStorage.removeItem(ADD_SUPPLIER);
       setTimeout(() => {
         navigate("/supplier");
-      }, 1000);
+      }, 100);
     } catch (error) {
       console.error(`ERROR (add-supplier): ${error?.response?.data?.message}`);
       toast.error(error?.response?.data?.message || "Failed to add Supplier");
