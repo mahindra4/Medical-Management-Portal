@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.10.2",
+    "@prisma/client": "^6.4.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -18,10 +18,10 @@
     "joi": "^17.12.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.12",
-    "prisma": "^5.10.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.9",
+    "prisma": "^6.4.1"
   }
 }

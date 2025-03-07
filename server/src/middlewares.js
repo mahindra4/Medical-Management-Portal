@@ -72,8 +72,9 @@ module.exports.validateStock = (req, res, next) => {
 };
 
 module.exports.validatePatient = (req, res, next) => {
+  // console.log("hello world")
   const { error } = patientSchema.validate(req.body);
-
+  console.log("patient details");
   if (error) {
     const msg = error.details.map((e) => e.message).join(",");
     throw new ExpressError(msg, 400);
