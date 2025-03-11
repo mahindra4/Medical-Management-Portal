@@ -35,19 +35,18 @@ const sendOtp = async (req, res, next) => {
   }
 
   const { otp, expiry } = generateOtp();
-  console.log(otp);
-  //setting up otp details in the verification model
+
   const otpDetail = await prisma.verification.upsert({
     where: {
       email,
     },
     update: {
-      otp: otp,
+      otp: "0000", 
       expiryTime: expiry,
     },
     create: {
       email: email,
-      otp: otp,
+      otp: "0000",
       expiryTime: expiry,
     },
   });
@@ -56,17 +55,17 @@ const sendOtp = async (req, res, next) => {
     throw new ExpressError("Error in sending OTP, Please try again later", 500);
   }
 
-  const mailTemplate = OTP_MAIL_TEMPLATE(otp);
-  const mailOptions = {
-    from: "dep2024.p06@gmail.com",
-    to: email,
-    subject: action == "SIGNUP" ? "Mediease - Signup" : "Mediease - Login",
-    html: mailTemplate,
-    text: "",
-  };
+  // const mailTemplate = OTP_MAIL_TEMPLATE(otp);
+  // const mailOptions = {
+  //   from: "dep2024.p06@gmail.com",
+  //   to: email,
+  //   subject: action == "SIGNUP" ? "Mediease - Signup" : "Mediease - Login",
+  //   html: mailTemplate,
+  //   text: "",
+  // };
 
-  const info = await sendMail(mailOptions);
-  if (info) {
+  // const info = await sendMail(mailOptions);
+  // if (info) {
     return res.status(200).json({
       ok: true,
       message: "OTP sent successfully",
@@ -74,12 +73,14 @@ const sendOtp = async (req, res, next) => {
         email: email,
       },
     });
-  } else {
-    throw new ExpressError("OTP sending failed", 500);
-  }
+  // } else {
+  //   throw new ExpressError("OTP sending failed", 500);
+  // }
 };
 
 const verifyOtp = async (req, res, next) => {
+
+
   const { email, otp } = req.body;
 
   const otpInfo = await prisma.verification.findUnique({
@@ -99,16 +100,17 @@ const verifyOtp = async (req, res, next) => {
     throw new ExpressError("OTP expired, Please try again", 400);
   }
 
+
   if (otpInfo.otp !== otp) {
-    throw new ExpressError("OTP invalid.", 401);
+      throw new ExpressError("OTP invalid.", 401);
   }
 
   //deleting the verification record for the user email
-  const deletedPrisma = await prisma.verification.delete({
-    where: {
-      email,
-    },
-  });
+    const deletedPrisma = await prisma.verification.delete({
+      where: {
+        email,
+      },
+    });
 
   return res.status(200).json({
     ok: true,

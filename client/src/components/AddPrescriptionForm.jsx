@@ -46,6 +46,10 @@ export default function AddPrescriptionForm() {
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState("");
+  const [diagnosisList, setDiagnosisList] = useState([]);
+  const [diagnosisSymptomsList, setDiagnosisSymptomsList] = useState({});
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState("");
+
   const TABLE_HEAD = [
     "Medicine Name",
     "Dosage",
@@ -74,10 +78,14 @@ export default function AddPrescriptionForm() {
       await fetchAvailableStock();
       await fetchDoctors();
       await fetchPatients();
+      await fetchDiagnosisList();
+      await fetchDiagnosisSymptomsList();
+
       const form_data = sessionStorage.getItem(FORM_STORAGE_KEY)
       const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL)
       const doctor_email = sessionStorage.getItem(HANDLE_DOCTOR_EMAIL)
 
+      
       if(form_data){
         setFormData(JSON.parse(form_data))
       }
@@ -103,7 +111,6 @@ export default function AddPrescriptionForm() {
       //   // console.log(JSON.parse(medicine_data))
       //   setDataArray(JSON.parse(medicine_data))
       // } 
-
       setLoading(false);
     },
     []
@@ -161,6 +168,41 @@ export default function AddPrescriptionForm() {
     }
   };
 
+  const fetchDiagnosisList = async () => {
+    try{
+      const response = await axios.get(apiRoutes.diagnosis, {
+        withCredentials: true,
+      })
+      // console.log(response.data.data);
+      setDiagnosisList(response.data.data);
+      console.log('diagnosis data')
+      console.log(response.data.data)
+      // console.log(diagnosisList)
+    } catch(err){
+      console.error(`Error in fetching Diagnosis List: ${err?.response.data?.message}`)
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch Diagnosis list"
+      )
+    }
+  };
+
+  const fetchDiagnosisSymptomsList = async () => {
+    try{
+      const response = await axios.get(`${apiRoutes.diagnosis}/symptoms`,{
+        withCredentials: true
+      })
+      console.log(`${apiRoutes.diagnosis}/symptoms`)
+      console.log(response.data.data)
+      setDiagnosisSymptomsList(response.data.data)
+
+    } catch(err){
+      console.error(`Error in fetching Diagnosis Symptoms List: ${err?.response.data?.message}`)
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch Diagnosis list"
+      )
+    }
+  }
+
   const handleInputChange = (key, index, value) => {
     // console.log(dataArray)
     console.log('handle Input Change')
@@ -181,19 +223,46 @@ export default function AddPrescriptionForm() {
     console.log('handle Doctor Change')
     console.log(selectedDoctor);
     setSelectedDoctor(selectedDoctor);
+
+    const doctorVal = selectedDoctor ? selectedDoctor.value : ""
     setFormData((prevData) => ({
       ...prevData,
-      doctor: selectedDoctor.value,
+      doctor: doctorVal,
     }));
     sessionStorage.setItem(HANDLE_DOCTOR_EMAIL,JSON.stringify(selectedDoctor))
   };
+
+  const handleDiagnosisChange = (selectedDiagnosis) => {
+    console.log(selectedDiagnosis)
+    setSelectedDiagnosis(selectedDiagnosis);
+    var diagnosisVal = "";
+    var symptomsVal = "";
+
+    if(selectedDiagnosis){
+      diagnosisVal = selectedDiagnosis.value;
+      const symptomsList = diagnosisSymptomsList[diagnosisVal];
+      symptomsVal = symptomsList.join(", ");
+    }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      diagnosis: diagnosisVal,
+      symptoms: symptomsVal,
+    }))
+    // add it in the session storage for draft feature and update it in the useEffect
+  }
+
   const handlePatientChange = (selectedPatient) => {
     console.log('handle Patient Change')
     console.log(selectedPatient);
+
     setSelectedPatient(selectedPatient);
+
+    const patientVal = (selectedPatient) ? selectedPatient.value : "";
+
     setFormData((prevData) => ({
       ...prevData,
-      email: selectedPatient.value,
+      email: patientVal,
     }));
     sessionStorage.setItem(HANDLE_PATIENT_EMAIL,JSON.stringify(selectedPatient))
   };
@@ -516,7 +585,22 @@ export default function AddPrescriptionForm() {
                         Diagnosis<span className="text-red-800">*</span>:
                       </label>
                     </div>
-                    <Textarea
+                    <Select
+                    id="diagnosis"
+                    options={
+                      diagnosisList.map((diagnosis) => ({
+                        value: diagnosis,
+                        label: diagnosis,
+                      }))
+                    }
+                    name="diagnosis"
+                    placeholder="Select Diagnosis"
+                    className="w-full"
+                    value={selectedDiagnosis}
+                    onChange={handleDiagnosisChange}
+                    isClearable={true}
+                    />
+                    {/* <Textarea
                       id="diagnosis"
                       size="md"
                       label="Diagnosis"
@@ -527,7 +611,7 @@ export default function AddPrescriptionForm() {
                       onChange={(e) =>
                         handleChange(e.target.name, e.target.value)
                       }
-                    />
+                    /> */}
                   </div>
 
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">

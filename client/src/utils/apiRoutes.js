@@ -20,6 +20,7 @@ export const apiRoutes = {
   schedule: `${baseUrl}/schedule`,
   dashboard: `${baseUrl}/dashboard`,
   profile: `${baseUrl}/profile`,
+  diagnosis: `${baseUrl}/diagnosis`,
 };
 
 // console.log(apiRoutes)

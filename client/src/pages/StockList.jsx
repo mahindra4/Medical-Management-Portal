@@ -38,7 +38,7 @@ export default function StockList() {
   useEffect(() => {
     const fetchData = async () => {
       const data = await getStockData();
-      // console.log("data out", data);
+      console.log("data out", data);
       setStock(data);
       setLoading(false);
     };
