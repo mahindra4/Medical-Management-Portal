@@ -48,7 +48,11 @@ export function AddMedicineForm() {
     if(!brandName) return;
     const response = await fetchRelatedMedicines(brandName);
     const data = response.data
-    setBrandOptions(data.map((brandName) => ({value: brandName, label: brandName})));
+    let options = data.map((brandName) => ({value: brandName, label: brandName}))
+    if(!options.some(option => option.value === brandName)){
+      options.unshift({value: brandName, label: brandName})
+    }
+    setBrandOptions(options);
   },500,[brandName])
 
   useEffect(
