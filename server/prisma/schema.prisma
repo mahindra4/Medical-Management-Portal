@@ -209,6 +209,35 @@ model DiagnosisSymptoms {
   @@map("diagnosis_symptoms")
 }
 
+
+model PatientQ {
+  id                Int           @id @default(autoincrement())
+  email             String        @unique
+  name              String
+  prescriptions     Prescription[]
+}
+
+model Prescription {
+  id                Int       @id @default(autoincrement())
+  patientEmail      String
+  temperature       Float?
+  bloodPressure     String?
+  pulseRate         String?
+  spO2              String?
+  symptoms          String?
+  diagnosis         String?
+  referredHospital  String?
+  referredDoctor    String?
+  timestamp         DateTime  @default(now())
+
+  patient           PatientQ   @relation(fields: [patientEmail], references: [email])
+}
+
+
+
+
+
+
 enum Status {
   ACTIVE
   INACTIVE
