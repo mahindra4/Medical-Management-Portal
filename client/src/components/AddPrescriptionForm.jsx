@@ -46,6 +46,7 @@ export default function AddPrescriptionForm() {
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState("");
+  const [pastPrescriptions, setPastPrescriptions] = useState([]);//added the pastprescription details
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [diagnosisSymptomsList, setDiagnosisSymptomsList] = useState({});
   const [selectedDiagnosis, setSelectedDiagnosis] = useState("");
@@ -80,6 +81,7 @@ export default function AddPrescriptionForm() {
       await fetchPatients();
       await fetchDiagnosisList();
       await fetchDiagnosisSymptomsList();
+      await handleLoadPastPrescriptions();
 
       const form_data = sessionStorage.getItem(FORM_STORAGE_KEY)
       const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL)
@@ -203,6 +205,65 @@ export default function AddPrescriptionForm() {
     }
   }
 
+
+  // const fetchRecurringDataOfPatient = async (patientId) => {
+  //   try {
+  //     const response = await axios.get(`${apiRoutes.checkup}/recurring`, {
+  //       params: {
+  //         patientId: patientId
+  //       },
+  //       withCredentials: true,
+  //     });
+      
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching recurring data:", error);
+  //     throw error;
+  //   }
+  // };
+//**************************************************************************************************************** */
+  const handleLoadPastPrescriptions = async () => {
+    if (!selectedPatient?.value) {
+      toast.error("Please select a patient first.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${apiRoutes.checkup}/${selectedPatient.value}`);
+      
+      if (response.status === 200) {
+        setPastPrescriptions(response.data);
+        toast.success("Past prescriptions loaded!");
+      }
+    } catch (error) {
+      console.error("Error fetching past prescriptions:", error);
+      toast.error("Error loading past prescriptions.");
+    }
+  };
+
+  // Auto-fill the form with selected past prescription
+  const handleAutofillPrescription = (prescriptionId) => {
+    const selectedPrescription = pastPrescriptions.find(
+      (prescription) => prescription.id === prescriptionId
+    );
+
+    if (selectedPrescription) {
+      setFormData({
+        email: selectedPrescription.patientEmail,
+        name: selectedPrescription.patient.name,
+        temperature: selectedPrescription.temperature,
+        bloodPressure: selectedPrescription.bloodPressure,
+        pulseRate: selectedPrescription.pulseRate,
+        spO2: selectedPrescription.spO2,
+        symptoms: selectedPrescription.symptoms,
+        diagnosis: selectedPrescription.diagnosis,
+        referredHospital: selectedPrescription.referredHospital,
+        referredDoctor: selectedPrescription.referredDoctor,
+      });
+      toast.success("Loaded past prescription details!");
+    }
+  };
+//**************************************************************************************************************** */
   const handleInputChange = (key, index, value) => {
     // console.log(dataArray)
     console.log('handle Input Change')
@@ -475,6 +536,26 @@ export default function AddPrescriptionForm() {
                       disabled
                     />
                   </div>
+                  
+          
+
+                  {/* Past Prescription Dropdown */}
+                  {pastPrescriptions.length > 0 && (
+                    <div className="mt-4">
+                      <label htmlFor="pastPrescriptions">Past Prescriptions:</label>
+                      <Select
+                        id="pastPrescriptions"
+                        options={pastPrescriptions.map((prescription) => ({
+                          value: prescription.id,
+                          label: `Prescription on ${new Date(prescription.timestamp).toLocaleDateString()}`,
+                        }))}
+                        onChange={(selectedOption) => handleAutofillPrescription(selectedOption.value)}
+                        placeholder="Select Past Prescription"
+                      />
+                    </div>
+                  )}
+
+                  
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="temperature">Temp.(C)</label>:
@@ -511,7 +592,7 @@ export default function AddPrescriptionForm() {
                   </div>
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="pulseRate">SpO2 (%)</label>:
+                      <label htmlFor="spO2">SpO2 (%)</label>:
                     </div>
                     <Input
                       id="spO2"
@@ -578,45 +659,33 @@ export default function AddPrescriptionForm() {
                       isClearable={true}
                     />
                   </div>
-
+  
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">
+                      <label htmlFor="diagnosis">
                         Diagnosis<span className="text-red-800">*</span>:
                       </label>
                     </div>
                     <Select
-                    id="diagnosis"
-                    options={
-                      diagnosisList.map((diagnosis) => ({
-                        value: diagnosis,
-                        label: diagnosis,
-                      }))
-                    }
-                    name="diagnosis"
-                    placeholder="Select Diagnosis"
-                    className="w-full"
-                    value={selectedDiagnosis}
-                    onChange={handleDiagnosisChange}
-                    isClearable={true}
-                    />
-                    {/* <Textarea
                       id="diagnosis"
-                      size="md"
-                      label="Diagnosis"
-                      name="diagnosis"
-                      type="text"
-                      className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
-                      value={formData.diagnosis}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
+                      options={
+                        diagnosisList.map((diagnosis) => ({
+                          value: diagnosis,
+                          label: diagnosis,
+                        }))
                       }
-                    /> */}
+                      name="diagnosis"
+                      placeholder="Select Diagnosis"
+                      className="w-full"
+                      value={selectedDiagnosis}
+                      onChange={handleDiagnosisChange}
+                      isClearable={true}
+                    />
                   </div>
-
+  
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">Symptoms:</label>
+                      <label htmlFor="symptoms">Symptoms:</label>
                     </div>
                     <Textarea
                       id="symptoms"
@@ -633,7 +702,7 @@ export default function AddPrescriptionForm() {
                   </div>
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">Referred Doctor:</label>
+                      <label htmlFor="referredDoctor">Referred Doctor:</label>
                     </div>
                     <Textarea
                       id="referredDoctor"
@@ -650,7 +719,7 @@ export default function AddPrescriptionForm() {
                   </div>
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">Referred Hospital:</label>
+                      <label htmlFor="referredHospital">Referred Hospital:</label>
                     </div>
                     <Textarea
                       id="referredHospital"
@@ -666,8 +735,8 @@ export default function AddPrescriptionForm() {
                     />
                   </div>
                 </div>
-
-                <div className="w-full ">
+  
+                <div className="w-full">
                   <table className="w-full min-w-max table-auto text-left">
                     <thead>
                       <tr>
@@ -692,10 +761,10 @@ export default function AddPrescriptionForm() {
                     </thead>
                     <tbody>
                       {dataArray.map((data, index) => (
-                        <tr className="even:bg-blue-gray">
+                        <tr key={index} className="even:bg-blue-gray">
                           <td className="p-4">
                             <Select
-                              id="medicine"
+                              id={`medicine-${index}`}
                               options={medicines.map((stock) => ({
                                 value: stock?.medicineId,
                                 netQuantity: stock?.netQuantity,
@@ -766,7 +835,7 @@ export default function AddPrescriptionForm() {
                         </tr>
                       ))}
                       <tr>
-                        <td colSpan="4" className="p-4">
+                        <td colSpan="5" className="p-4">
                           <div className="flex justify-center items-center gap-2">
                             <Tooltip content="Add">
                               <IconButton variant="text" onClick={handleAddRow}>
