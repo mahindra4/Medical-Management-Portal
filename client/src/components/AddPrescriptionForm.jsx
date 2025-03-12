@@ -22,6 +22,7 @@ import { apiRoutes } from "../utils/apiRoutes";
 import { useAuthContext } from "../hooks/useAuthContext";
 import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
+import { use } from "react";
 
 export default function AddPrescriptionForm() {
   const navigate = useNavigate();
@@ -48,7 +49,8 @@ export default function AddPrescriptionForm() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [diagnosisSymptomsList, setDiagnosisSymptomsList] = useState({});
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState("");
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState({});
+  const [symptom, setSymptom] = useState("")
 
   const TABLE_HEAD = [
     "Medicine Name",
@@ -69,6 +71,9 @@ export default function AddPrescriptionForm() {
   const HANDLE_SELECTED_MEDICINE = "handleSelectedMedicine"
   const HANDLE_PATIENT_EMAIL = "handlePatientEmail"
   const HANDLE_DOCTOR_EMAIL = "handleDoctorEmail"
+  const HANDLE_DIAGNOSIS_CHANGE = "handleDiagnosisChange"
+  const HANDLE_DIAGNOSIS_VALUE_CHANGE = "handleDiagnosisValueChange"
+  const HANDLE_SYMPTOM_CHANGE = "handleSymptomChange"
 
   useEffect(
     () => async () => {
@@ -84,8 +89,13 @@ export default function AddPrescriptionForm() {
       const form_data = sessionStorage.getItem(FORM_STORAGE_KEY)
       const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL)
       const doctor_email = sessionStorage.getItem(HANDLE_DOCTOR_EMAIL)
-
+      const diagnosis = sessionStorage.getItem(HANDLE_DIAGNOSIS_CHANGE)
+      const diagnosisVal = sessionStorage.getItem(HANDLE_DIAGNOSIS_VALUE_CHANGE)
+      const symptom = sessionStorage.getItem(HANDLE_SYMPTOM_CHANGE)
       
+      console.log("initial---------------------------")
+      console.log(symptom)
+
       if(form_data){
         setFormData(JSON.parse(form_data))
       }
@@ -96,6 +106,22 @@ export default function AddPrescriptionForm() {
       if(doctor_email){
         setSelectedDoctor(JSON.parse(doctor_email))
       }
+
+      if(diagnosis){
+        setSelectedDiagnosis(JSON.parse(diagnosis))
+        setFormData((prevData) => ({
+          ...prevData,
+          diagnosis: diagnosisVal
+        }))
+      }
+
+      if(symptom){
+        setFormData((prevData) => ({
+          ...prevData,
+          symptoms: symptom,
+        }))
+      }
+
       // if(savedData){
       //   setFormData(JSON.parse(savedData)) 
       //   console.log(JSON.parse(savedData))
@@ -111,6 +137,12 @@ export default function AddPrescriptionForm() {
       //   // console.log(JSON.parse(medicine_data))
       //   setDataArray(JSON.parse(medicine_data))
       // } 
+
+      formData.date = // default date => today
+      setFormData((prevData) => ({
+        ...prevData,
+        date: new Date().toISOString().split('T')[0],
+      }))
       setLoading(false);
     },
     []
@@ -235,20 +267,41 @@ export default function AddPrescriptionForm() {
   const handleDiagnosisChange = (selectedDiagnosis) => {
     console.log(selectedDiagnosis)
     setSelectedDiagnosis(selectedDiagnosis);
+
+    sessionStorage.setItem(HANDLE_DIAGNOSIS_CHANGE,JSON.stringify(selectedDiagnosis))
     var diagnosisVal = "";
     var symptomsVal = "";
 
     if(selectedDiagnosis){
-      diagnosisVal = selectedDiagnosis.value;
-      const symptomsList = diagnosisSymptomsList[diagnosisVal];
-      symptomsVal = symptomsList.join(", ");
+      for(let diagnosis of selectedDiagnosis){
+        if(diagnosisVal === ""){
+          diagnosisVal = diagnosis.value;
+        }
+        else{
+          diagnosisVal = diagnosisVal+", "+diagnosis.value;
+        }
+        const symptomsList = diagnosisSymptomsList[diagnosis.value].join(", ");
+        if(symptomsVal === ""){
+          symptomsVal = symptomsList;
+        }
+        else{
+          symptomsVal = symptomsVal+", "+symptomsList
+        }
+      }
+      // symptomsVal = symptomsList.join(", ");
     }
+    sessionStorage.setItem(HANDLE_DIAGNOSIS_VALUE_CHANGE,diagnosisVal)
+    sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,symptomsVal)
 
+    console.log(`diagnosisval: ${diagnosisVal}`);
+    console.log(formData.date)
     setFormData((prevData) => ({
       ...prevData,
       diagnosis: diagnosisVal,
       symptoms: symptomsVal,
     }))
+
+    console.log(formData)
     // add it in the session storage for draft feature and update it in the useEffect
   }
 
@@ -309,6 +362,7 @@ export default function AddPrescriptionForm() {
     console.log('handle Submit')
     e.preventDefault();
     // Here you can handle the submission of the form
+    console.log(formData.diagnosis)
     const checkupListEntry = {
       patientId: selectedPatient?.value?.id,
       date: formData.date,
@@ -369,6 +423,9 @@ export default function AddPrescriptionForm() {
       sessionStorage.removeItem(HANDLE_SELECTED_MEDICINE) 
       sessionStorage.removeItem(HANDLE_PATIENT_EMAIL) 
       sessionStorage.removeItem(HANDLE_DOCTOR_EMAIL) 
+      sessionStorage.removeItem(HANDLE_DIAGNOSIS_CHANGE)
+      sessionStorage.removeItem(HANDLE_DIAGNOSIS_VALUE_CHANGE)
+      sessionStorage.removeItem(HANDLE_SYMPTOM_CHANGE)
 
       setTimeout(() => {
         navigate("/prescription");
@@ -586,19 +643,20 @@ export default function AddPrescriptionForm() {
                       </label>
                     </div>
                     <Select
-                    id="diagnosis"
-                    options={
-                      diagnosisList.map((diagnosis) => ({
-                        value: diagnosis,
-                        label: diagnosis,
-                      }))
-                    }
-                    name="diagnosis"
-                    placeholder="Select Diagnosis"
-                    className="w-full"
-                    value={selectedDiagnosis}
-                    onChange={handleDiagnosisChange}
-                    isClearable={true}
+                      id="diagnosis"
+                      options={
+                        diagnosisList.map((diagnosis) => ({
+                          value: diagnosis,
+                          label: diagnosis,
+                        }))
+                      }
+                      isMulti
+                      name="diagnosis"
+                      placeholder="Select Diagnosis"
+                      className="w-full"
+                      value={selectedDiagnosis}
+                      onChange={handleDiagnosisChange}
+                      isClearable={true}
                     />
                     {/* <Textarea
                       id="diagnosis"
@@ -626,9 +684,10 @@ export default function AddPrescriptionForm() {
                       type="text"
                       className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
                       value={formData.symptoms}
-                      onChange={(e) =>
+                      onChange={(e) =>{
+                        sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,e.target.value)
                         handleChange(e.target.name, e.target.value)
-                      }
+                      }}
                     />
                   </div>
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
