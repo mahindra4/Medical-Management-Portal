@@ -288,6 +288,15 @@ const createCheckup = async (req, res, next) => {
     }
   }
 
+
+
+
+
+
+
+
+
+
   // for (const [idx, medicine] of checkupMedicines.entries()) {
   //   const medicineRecord = await prisma.medicine.findUnique({
   //     where: {
@@ -762,6 +771,29 @@ const deleteCheckup = async (req, res, next) => {
   });
 };
 
+const getPastPrescriptions = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const prescriptions = await prisma.prescription.findMany({
+      where: { patientEmail: email },
+      orderBy: { timestamp: 'desc' },
+      take: 5, // Limit to 5 records, adjust as needed
+    });
+
+    if (prescriptions.length > 0) {
+      res.status(200).json(prescriptions);
+    } else {
+      res.status(404).json({ message: "No past prescriptions found." });
+    }
+  } catch (error) {
+    console.error("Error fetching past prescriptions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
 module.exports = {
   getCheckupDetails,
   getCheckupList,
@@ -769,4 +801,5 @@ module.exports = {
   createCheckup,
   updateCheckup,
   deleteCheckup,
+  getPastPrescriptions,
 };
