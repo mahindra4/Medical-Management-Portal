@@ -95,6 +95,7 @@ const roleMapping = new Map([
     ["CREATE_SUPPLIER", ["A", "PM"]],
     ["UPDATE_SUPPLIER", ["A", "PM"]],
     ["DELETE_SUPPLIER", ["A", "PM"]],
+    ["GET_PAST_PRESCRIPTION",["D","PM"]],
 
     // diagnosis routes
     ["GET_DIAGNOSIS_LIST", ["D","PM"]],
