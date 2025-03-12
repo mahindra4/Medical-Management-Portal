@@ -9,7 +9,8 @@ const {
     getMedicalHistory,
     createCheckup,
     updateCheckup,
-    deleteCheckup
+    deleteCheckup,
+    getPastPrescriptions
 } = require('../controllers/checkupController');
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -19,7 +20,7 @@ const roleMap = require("../utils/roleMap");
 
 router.get('/patient/:patientEmail', authMiddleware(roleMap("GET_MEDICAL_HISTORY")), profileMiddleware(true), catchAsync(getMedicalHistory));
 router.get('/:id', authMiddleware(roleMap("GET_CHECKUP_DETAILS")), profileMiddleware(true), catchAsync(getCheckupDetails));
-
+router.get('/:email',authMiddleware(roleMap("GET_PAST_PRESCRIPTION")) ,catchAsync(getPastPrescriptions));
 router.use(authMiddleware([], false), profileMiddleware(true));
 
 router.get('/',authMiddleware(roleMap("GET_CHECKUP_LIST")), catchAsync(getCheckupList));
