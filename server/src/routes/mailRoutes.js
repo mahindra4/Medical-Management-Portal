@@ -32,7 +32,7 @@ router.post(
 //a
 router.post(
   "/pending", 
-  authMiddleware(roleMap("PENDING_REQUEST_CONTROLLER")), 
+  // authMiddleware(roleMap("PENDING_REQUEST_CONTROLLER")), // no need since we want to send requests to all the admins, token won't be needed for signup  
   catchAsync(pendingRequestController)
 );
 

@@ -141,9 +141,11 @@ module.exports.validateSendOtp = (req, res, next) => {
   const { error } = sendOtpSchema.validate(req.body);
 
   if (error) {
+    console.log('invalid otp');
     const msg = error.details.map((e) => e.message).join(",");
     throw new ExpressError(msg, 400);
   } else {
+    console.log('valid otp');
     next();
   }
 };

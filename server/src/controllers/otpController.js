@@ -55,17 +55,17 @@ const sendOtp = async (req, res, next) => {
     throw new ExpressError("Error in sending OTP, Please try again later", 500);
   }
 
-  // const mailTemplate = OTP_MAIL_TEMPLATE(otp);
-  // const mailOptions = {
-  //   from: "dep2024.p06@gmail.com",
-  //   to: email,
-  //   subject: action == "SIGNUP" ? "Mediease - Signup" : "Mediease - Login",
-  //   html: mailTemplate,
-  //   text: "",
-  // };
+  const mailTemplate = OTP_MAIL_TEMPLATE(otp);
+  const mailOptions = {
+    from: "dep2024.p06@gmail.com",
+    to: email,
+    subject: action == "SIGNUP" ? "Mediease - Signup" : "Mediease - Login",
+    html: mailTemplate,
+    text: "",
+  };
 
-  // const info = await sendMail(mailOptions);
-  // if (info) {
+  const info = await sendMail(mailOptions);
+  if (info) {
     return res.status(200).json({
       ok: true,
       message: "OTP sent successfully",
@@ -73,9 +73,9 @@ const sendOtp = async (req, res, next) => {
         email: email,
       },
     });
-  // } else {
-  //   throw new ExpressError("OTP sending failed", 500);
-  // }
+  } else {
+    throw new ExpressError("OTP sending failed", 500);
+  }
 };
 
 const verifyOtp = async (req, res, next) => {

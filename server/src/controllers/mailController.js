@@ -130,7 +130,7 @@ const pendingRequestController = async (req, res, next) => {
   console.log(name);
   console.log(email);
   console.log(role);
-  console.log("jello wolrd");
+  console.log("hello world");
   const request = await prisma.requests.create({
     data: {
       name,

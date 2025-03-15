@@ -126,6 +126,8 @@ export function AddMedicineForm() {
     console.log("handle brand name input change")
     console.log(inputBrandName)
     setBrandName(inputBrandName)
+    if(inputBrandName) setBrandOptions([{value: inputBrandName, label: inputBrandName}]);
+    else setBrandOptions([])
   }
 
   const handleBrandNameChange = (selectedBrandName) => {
