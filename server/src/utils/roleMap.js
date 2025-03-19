@@ -99,6 +99,9 @@ const roleMapping = new Map([
     // diagnosis routes
     ["GET_DIAGNOSIS_LIST", ["D","PM"]],
     ["GET_DIAGNOSIS_SYMPTOMS_LIST", ["D","PM"]],
+
+    // hospital routes
+    ["GET_HOSPITAL_LIST", ["D","PM"]],
 ]);
 
 const numToRoleMapping = new Map([

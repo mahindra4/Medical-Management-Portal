@@ -49,8 +49,10 @@ export default function AddPrescriptionForm() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [diagnosisSymptomsList, setDiagnosisSymptomsList] = useState({});
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState({});
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [symptom, setSymptom] = useState("")
+  const [hosptialList, setHospitalList] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState({});
 
   const TABLE_HEAD = [
     "Medicine Name",
@@ -67,13 +69,14 @@ export default function AddPrescriptionForm() {
   const [selectedMedicine, setSelectedMedicine] = useState("");
 
   const FORM_STORAGE_KEY = "prescriptionFormData";
-  const HANDLE_INPUT_CHANGE_KEY = "handleInputChange"
-  const HANDLE_SELECTED_MEDICINE = "handleSelectedMedicine"
-  const HANDLE_PATIENT_EMAIL = "handlePatientEmail"
-  const HANDLE_DOCTOR_EMAIL = "handleDoctorEmail"
-  const HANDLE_DIAGNOSIS_CHANGE = "handleDiagnosisChange"
-  const HANDLE_DIAGNOSIS_VALUE_CHANGE = "handleDiagnosisValueChange"
-  const HANDLE_SYMPTOM_CHANGE = "handleSymptomChange"
+  const HANDLE_INPUT_CHANGE_KEY = "handleInputChange";
+  const HANDLE_SELECTED_MEDICINE = "handleSelectedMedicine";
+  const HANDLE_PATIENT_EMAIL = "handlePatientEmail";
+  const HANDLE_DOCTOR_EMAIL = "handleDoctorEmail";
+  const HANDLE_DIAGNOSIS_CHANGE = "handleDiagnosisChange";
+  const HANDLE_DIAGNOSIS_VALUE_CHANGE = "handleDiagnosisValueChange";
+  const HANDLE_SYMPTOM_CHANGE = "handleSymptomChange";
+  const HANDLE_HOSPITAL_CHANGE = "handleHospitalChange";
 
   useEffect(
     () => async () => {
@@ -85,29 +88,41 @@ export default function AddPrescriptionForm() {
       await fetchPatients();
       await fetchDiagnosisList();
       await fetchDiagnosisSymptomsList();
+      await fetchHospitalList();
 
-      const form_data = sessionStorage.getItem(FORM_STORAGE_KEY)
-      const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL)
-      const doctor_email = sessionStorage.getItem(HANDLE_DOCTOR_EMAIL)
-      const diagnosis = sessionStorage.getItem(HANDLE_DIAGNOSIS_CHANGE)
-      const diagnosisVal = sessionStorage.getItem(HANDLE_DIAGNOSIS_VALUE_CHANGE)
-      const symptom = sessionStorage.getItem(HANDLE_SYMPTOM_CHANGE)
-      
-      console.log("initial---------------------------")
-      console.log(symptom)
+      const form_data = sessionStorage.getItem(FORM_STORAGE_KEY);
+      const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL);
+      const doctor_email = sessionStorage.getItem(HANDLE_DOCTOR_EMAIL);
+      const diagnosis = sessionStorage.getItem(HANDLE_DIAGNOSIS_CHANGE);
+      const diagnosisVal = sessionStorage.getItem(HANDLE_DIAGNOSIS_VALUE_CHANGE);
+      const symptom = sessionStorage.getItem(HANDLE_SYMPTOM_CHANGE);
+      const hospital = sessionStorage.getItem(HANDLE_HOSPITAL_CHANGE);
 
-      if(form_data){
+      // console.log("initial---------------------------")
+      // console.log("form_data: ", form_data);
+      // console.log("patient_email: ",patient_email);
+      // console.log("doctor_email: ", doctor_email);
+      // console.log("diagnosis: ", diagnosis);
+      // console.log("diagnosisVal: ", diagnosisVal);
+      // console.log("symptom: ", symptom);
+
+      setFormData((prevData) => ({
+        ...prevData,
+        date: new Date().toISOString().split('T')[0],
+      }))
+
+      if(form_data != null){
         setFormData(JSON.parse(form_data))
       }
-      if(patient_email){
+      if(patient_email != null){
         setSelectedPatient(JSON.parse(patient_email))
       }
 
-      if(doctor_email){
+      if(doctor_email != null){
         setSelectedDoctor(JSON.parse(doctor_email))
       }
 
-      if(diagnosis){
+      if(diagnosis != null){
         setSelectedDiagnosis(JSON.parse(diagnosis))
         setFormData((prevData) => ({
           ...prevData,
@@ -115,20 +130,25 @@ export default function AddPrescriptionForm() {
         }))
       }
 
-      if(symptom){
+      if(symptom != null){
         setFormData((prevData) => ({
           ...prevData,
           symptoms: symptom,
         }))
       }
 
+      if(hospital != null){
+        setSelectedHospital(JSON.parse(hospital));
+      }
+
+      // console.log("formData: ", formData);
       // if(savedData){
       //   setFormData(JSON.parse(savedData)) 
       //   console.log(JSON.parse(savedData))
       // }
 
       const medical_data = sessionStorage.getItem(HANDLE_INPUT_CHANGE_KEY)
-      if(medical_data){
+      if(medical_data != null){
         setDataArray(JSON.parse(medical_data))
       }
 
@@ -138,11 +158,10 @@ export default function AddPrescriptionForm() {
       //   setDataArray(JSON.parse(medicine_data))
       // } 
 
-      formData.date = // default date => today
-      setFormData((prevData) => ({
-        ...prevData,
-        date: new Date().toISOString().split('T')[0],
-      }))
+      // formData.date = // default date => today
+
+      // console.log("formData: ", formData);
+      // console.log("formData symptoms: ", formData.symptoms);
       setLoading(false);
     },
     []
@@ -235,6 +254,20 @@ export default function AddPrescriptionForm() {
     }
   }
 
+  const fetchHospitalList = async () => {
+    try{
+      const response = await axios.get(apiRoutes.hospitals, {
+        withCredentials: true
+      });
+      setHospitalList(response.data.data);
+    } catch(err){
+      console.error(`Error in fetching Hospital List: ${err?.response.data?.message}`);
+      toast.error(
+        error?.response?.data?.message || "Failed to Hospital list"
+      )
+    }
+  }
+
   const handleInputChange = (key, index, value) => {
     // console.log(dataArray)
     console.log('handle Input Change')
@@ -265,14 +298,14 @@ export default function AddPrescriptionForm() {
   };
 
   const handleDiagnosisChange = (selectedDiagnosis) => {
-    console.log(selectedDiagnosis)
+    console.log("selected diagnosis: ",selectedDiagnosis)
     setSelectedDiagnosis(selectedDiagnosis);
 
     sessionStorage.setItem(HANDLE_DIAGNOSIS_CHANGE,JSON.stringify(selectedDiagnosis))
     var diagnosisVal = "";
     var symptomsVal = "";
 
-    if(selectedDiagnosis){
+    // if(selectedDiagnosis){
       for(let diagnosis of selectedDiagnosis){
         if(diagnosisVal === ""){
           diagnosisVal = diagnosis.value;
@@ -289,7 +322,7 @@ export default function AddPrescriptionForm() {
         }
       }
       // symptomsVal = symptomsList.join(", ");
-    }
+    // }
     sessionStorage.setItem(HANDLE_DIAGNOSIS_VALUE_CHANGE,diagnosisVal)
     sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,symptomsVal)
 
@@ -304,6 +337,19 @@ export default function AddPrescriptionForm() {
     console.log(formData)
     // add it in the session storage for draft feature and update it in the useEffect
   }
+
+  const handleHospitalChange = (selectedHospital) => {
+    console.log("selected hospital: ",selectedHospital); 
+    setSelectedHospital(selectedHospital);
+
+    const referredHospital = (selectedHospital) ? selectedHospital.value : "";
+    setFormData((prevData) => ({
+      ...prevData,
+      referredHospital,
+    }))
+
+    sessionStorage.setItem(HANDLE_HOSPITAL_CHANGE, JSON.stringify(selectedHospital));
+  } 
 
   const handlePatientChange = (selectedPatient) => {
     console.log('handle Patient Change')
@@ -426,6 +472,7 @@ export default function AddPrescriptionForm() {
       sessionStorage.removeItem(HANDLE_DIAGNOSIS_CHANGE)
       sessionStorage.removeItem(HANDLE_DIAGNOSIS_VALUE_CHANGE)
       sessionStorage.removeItem(HANDLE_SYMPTOM_CHANGE)
+      sessionStorage.removeItem(HANDLE_HOSPITAL_CHANGE)
 
       setTimeout(() => {
         navigate("/prescription");
@@ -711,7 +758,7 @@ export default function AddPrescriptionForm() {
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">Referred Hospital:</label>
                     </div>
-                    <Textarea
+                    {/* <Textarea
                       id="referredHospital"
                       size="md" 
                       label="Referred Hospital"
@@ -722,6 +769,22 @@ export default function AddPrescriptionForm() {
                       onChange={(e) =>
                         handleChange(e.target.name, e.target.value)
                       }
+                    /> */}
+
+                    <Select
+                      id="referredHospital"
+                      options={
+                        hosptialList.map((hospital) => ({
+                          value: hospital,
+                          label: hospital
+                        }))
+                      }
+                      name="referredHospital"
+                      placeholder="Select Hospital"
+                      className="w-full"
+                      value={selectedHospital}
+                      onChange={handleHospitalChange}
+                      isClearable={true}
                     />
                   </div>
                 </div>

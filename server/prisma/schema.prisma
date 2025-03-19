@@ -209,6 +209,13 @@ model DiagnosisSymptoms {
   @@map("diagnosis_symptoms")
 }
 
+model Hospitals {
+  id   String @id @default(uuid())
+  name String
+
+  @@map("hospitals")
+}
+
 enum Status {
   ACTIVE
   INACTIVE
