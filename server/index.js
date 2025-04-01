@@ -27,6 +27,8 @@ const dashboardRoutes = require('./src/routes/dashboardRoutes.js');
 const checkupRoutes = require("./src/routes/checkupRoutes.js");
 const profileRoutes = require("./src/routes/profileRoutes.js");
 const ExpressError = require("./src/utils/ExpressError.js");
+const diagnosisRoutes = require("./src/routes/diagnosisRoutes.js");
+const hospitalRoutes = require("./src/routes/hospitalRoutes.js");
 
 app.use("/api/otp", otpRoutes);
 app.use("/api/auth", authRoutes);
@@ -38,13 +40,15 @@ app.use("/api/checkup", checkupRoutes);
 app.use("/api/supplier", supplierRoutes);
 app.use("/api/medicine", medicineRoutes);
 app.use("/api/stock", stockRoutes);
-app.use("/api/patient", patientRoutes);
+app.use("/api/patient", patientRoutes); // ------------------- changed -----------------------------
 app.use("/api/category", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 app.use('/api/schedule',scheduleRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/diagnosis",diagnosisRoutes);
+app.use("/api/hospitals", hospitalRoutes);
 
 app.all("*", (req, res) => {
   throw new ExpressError("Page Not Found", 404);

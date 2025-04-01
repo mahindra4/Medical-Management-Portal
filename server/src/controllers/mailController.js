@@ -127,6 +127,10 @@ const rejectRequestController = async (req, res, next) => {
 
 const pendingRequestController = async (req, res, next) => {
   const { name, email, role } = req.body;
+  console.log(name);
+  console.log(email);
+  console.log(role);
+  console.log("hello world");
   const request = await prisma.requests.create({
     data: {
       name,
@@ -150,7 +154,7 @@ const pendingRequestController = async (req, res, next) => {
   );
   for (let i = 0; i < admins.length; i++) {
     adminEmail = admins[i].email;
-
+    console.log(adminEmail);
     const mailOptionsAdmin = {
       from: "dep2024.p06@gmail.com",
       to: adminEmail,

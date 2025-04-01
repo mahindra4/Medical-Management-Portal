@@ -17,6 +17,11 @@ import { apiRoutes } from "../utils/apiRoutes";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 import Layout from "../layouts/PageLayout";
 import { setNavigateTimeout, setToastTimeout } from "../utils/customTimeout";
+
+const FORM_KEY = "patientFormKey"
+
+
+
 export default function AddPatientForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -35,14 +40,32 @@ export default function AddPatientForm() {
 
   const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
+  useEffect(
+    ()=>{
+      const form_data = sessionStorage.getItem(FORM_KEY)
+      console.log(form_data)
+      if(form_data){
+        setFormData(JSON.parse(form_data))
+      }
+    },
+    []
+  );
+
   const handleChange = (name, value) => {
     // console.log(e.target);
     // const { name, value } = e.target;
     // console.log(name, value);
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    console.log('name: '+name);
+    console.log('value: '+value);
+    setFormData((prevData) => {
+      
+      const updatedData = {
+        ...prevData,
+        [name]: value,
+      }; 
+      sessionStorage.setItem(FORM_KEY,JSON.stringify(updatedData));
+      return updatedData;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -68,7 +91,10 @@ export default function AddPatientForm() {
       const data = res?.data;
       console.log("patient record saved successfully");
       setToastTimeout("success", "Patient added successfully", 200);
-      setNavigateTimeout(navigate, "/patient", 1000);
+
+      sessionStorage.removeItem(FORM_KEY)
+
+      setNavigateTimeout(navigate, "/patient", 100);
     } catch (error) {
       console.error(
         `ERROR (create-patient-record): ${error?.response?.data?.message}`
@@ -78,10 +104,11 @@ export default function AddPatientForm() {
         error?.response?.data?.message || "Patient record creation failed",
         200
       );
-    }
-    setTimeout(() => {
+    } finally{
+    // setTimeout(() => {
       setLoading(false);
-    }, 100);
+    // }, 100);
+  } 
   };
   return (
     <>

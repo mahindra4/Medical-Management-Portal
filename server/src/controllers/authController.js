@@ -1,4 +1,5 @@
-const { User, Staff, Patient } = require("../mongo_schema.js");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 const { v4: uuidv4 } = require("uuid");
 const ExpressError = require("../utils/ExpressError");
 const { generateToken } = require("../utils/handleJWT.js");
@@ -10,34 +11,41 @@ const signup = async (req, res, next) => {
   try {
     const { email, role, name } = req.body;
 
-    // Check if the user already exists
-    const userAlreadyExists = await User.findOne({ email });
+    const userAlreadyExists = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
 
     if (userAlreadyExists && userAlreadyExists.status === "ACTIVE") {
       throw new ExpressError("User already exists.", 409);
     }
-
     let newUser;
     if (userAlreadyExists && userAlreadyExists.status === "INACTIVE") {
-      // Restore user
-      userAlreadyExists.status = "ACTIVE";
-      userAlreadyExists.role = role;
-      userAlreadyExists.name = name;
-      newUser = await userAlreadyExists.save();
-    }
-
-    if (!userAlreadyExists) {
-      // Create a new user
-      const user = new User({
-        id: uuidv4(),
-        email,
-        role,
-        name,
-        status: "ACTIVE",
+      const restoredUser = await prisma.user.update({
+        where: {
+          email: email,
+        },
+        data: {
+          role,
+          name,
+          status: "ACTIVE",
+        },
       });
-      newUser = await user.save();
+      newUser = restoredUser;
     }
-
+    if (!userAlreadyExists) {
+      const user = await prisma.user.create({
+        data: {
+          id: uuidv4(),
+          email,
+          role,
+          name,
+        },
+      });
+      newUser = user;
+    }
+    console.log(newUser);
     if (newUser) {
       const token = generateToken(
         {
@@ -46,20 +54,21 @@ const signup = async (req, res, next) => {
         "2h"
       );
 
+
       res.cookie("token", token, {
         maxAge: 2 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true,
+        secure: true
       });
       res.cookie("role", role, {
         maxAge: 2 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true,
+        secure: true
       });
       res.cookie("name", newUser.name, {
         maxAge: 2 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true,
+        secure: true
       });
 
       return res.status(201).json({
@@ -70,7 +79,7 @@ const signup = async (req, res, next) => {
             email: newUser.email,
             role: newUser.role,
             name: newUser.name,
-            profileComplete: false,
+            profileComplete: false
           },
         },
       });
@@ -82,6 +91,25 @@ const signup = async (req, res, next) => {
   }
 };
 
+
+const add_cookie = (req, res, next) => {
+  res.cookie("token", token, {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true
+  });
+  res.cookie("role", role, {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true
+  });
+  res.cookie("name", newUser.name, {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true
+  });
+}
+
 // @desc     User Login
 // route     POST /api/auth/login
 // @access   Public
@@ -89,27 +117,38 @@ const login = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    // Find the user by email
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!user || user.status === "INACTIVE") {
-      throw new ExpressError("User does not exist", 400);
+      throw new ExpressError("User does not exists", 400);
     }
-
-    // Checking complete profile assertion
+    
+    //Checking complete profile assertion 
     let profileIsComplete = true;
     if (user.role === "DOCTOR" || user.role === "PARAMEDICAL") {
-      const staffExists = await Staff.findOne({ email });
+        const staffExists = await prisma.staff.findUnique({
+          where: {
+            email,
+          }
+        });
 
-      if (!staffExists || staffExists.status === "INACTIVE") {
-        profileIsComplete = false;
-      }
+        if (!staffExists || staffExists.status === "INACTIVE") {
+          profileIsComplete = false;
+        }
     } else if (user.role === "PATIENT") {
-      const patientExists = await Patient.findOne({ email });
+        const patientExists = await prisma.patient.findUnique({
+          where: {
+            email,
+          }
+        });
 
-      if (!patientExists || patientExists.status === "INACTIVE") {
-        profileIsComplete = false;
-      }
+        if (!patientExists || patientExists.status === "INACTIVE") {
+          profileIsComplete = false;
+        }
     }
 
     const token = generateToken(
@@ -119,20 +158,21 @@ const login = async (req, res, next) => {
       "2h"
     );
 
+
     res.cookie("token", token, {
       maxAge: 2 * 60 * 60 * 1000,
       httpOnly: true,
-      secure: true,
+      secure: true
     });
     res.cookie("role", user.role, {
       maxAge: 2 * 60 * 60 * 1000,
       httpOnly: true,
-      secure: true,
+      secure: true
     });
     res.cookie("name", user.name, {
       maxAge: 2 * 60 * 60 * 1000,
       httpOnly: true,
-      secure: true,
+      secure: true
     });
 
     return res.status(200).json({
@@ -143,7 +183,7 @@ const login = async (req, res, next) => {
           email: user.email,
           role: user.role,
           name: user.name,
-          profileComplete: profileIsComplete,
+          profileComplete: profileIsComplete
         },
       },
     });
@@ -152,8 +192,8 @@ const login = async (req, res, next) => {
   }
 };
 
-// @desc     User Logout
-// route     POST /api/auth/logout
+// @desc     User Signup
+// route     POST /api/auth/signup
 // @access   Public
 const logout = async (req, res, next) => {
   try {
@@ -165,16 +205,16 @@ const logout = async (req, res, next) => {
     });
     res.clearCookie("role", {
       httpOnly: true,
-      secure: true,
+      secure: true
     });
     res.clearCookie("name", {
       httpOnly: true,
-      secure: true,
+      secure: true
     });
 
     return res.status(200).json({
       ok: true,
-      message: "User logged out successfully.",
+      message: "User logout successfully.",
       data: {},
     });
   } catch (err) {
@@ -185,5 +225,5 @@ const logout = async (req, res, next) => {
 module.exports = {
   signup,
   login,
-  logout,
+  logout
 };

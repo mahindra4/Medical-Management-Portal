@@ -1,115 +1,199 @@
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 const { v4: uuidv4 } = require("uuid");
 const ExpressError = require("../utils/ExpressError");
 const sendMail = require("../utils/sendMail");
-const {
-  ACCOUNT_CREATED_MAIL_TEMPLATE,
-  ACCOUNT_DELETED_MAIL_TEMPLATE,
-} = require("../../constants");
-const { User } = require("../mongo_schem");
-
+const { ACCOUNT_CREATED_MAIL_TEMPLATE, ACCOUNT_DELETED_MAIL_TEMPLATE} = require("../../constants");
 // @desc    Get Admin List
 // route    GET /api/admin
 // @access  Private (Admin)
 const getAdminList = async (req, res, next) => {
-  try {
-    const adminList = await User.find({ role: "ADMIN", status: "ACTIVE" });
-    return res.status(200).json({
-      ok: true,
-      data: adminList,
-      message: "Admin List retrieved successfully",
-    });
-  } catch (err) {
-    next(new ExpressError("Failed to fetch admin list", 500));
-  }
+  const adminList = await prisma.user.findMany({
+    where: {
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+  });
+  console.log(adminList);
+
+  return res.status(200).json({
+    ok: true,
+    data: adminList,
+    message: "Admin List retrieved successfully",
+  });
 };
 
 // @desc    Create Admin Records
 // route    POST /api/admin
 // @access  Private (Admin)
 const createAdmin = async (req, res, next) => {
-  try {
-    const { name, email } = req.body;
-    let userRecord = await User.findOne({ email });
-    
-    if (userRecord && userRecord.status === "ACTIVE") {
-      throw new ExpressError("User already exists with the given email.", 400);
-    }
+  console.log(req.body);
+  const { name, email } = req.body;
 
-    let newRecord;
-    if (userRecord && userRecord.status === "INACTIVE") {
-      userRecord.name = name;
-      userRecord.role = "ADMIN";
-      userRecord.status = "ACTIVE";
-      newRecord = await userRecord.save();
-    } else {
-      newRecord = await User.create({ name, email, role: "ADMIN" });
-    }
-
-    const mailOptions = {
-      from: "dep2024.p06@gmail.com",
-      to: email,
-      subject: "Mediease - Account Created",
-      html: ACCOUNT_CREATED_MAIL_TEMPLATE(),
-    };
-    
-    await sendMail(mailOptions);
-
-    return res.status(200).json({
-      ok: true,
-      data: newRecord,
-      message: "Admin added successfully",
-    });
-  } catch (err) {
-    next(new ExpressError("Failed to create admin", 500));
+  const userRecord = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  if (userRecord && userRecord.status == "ACTIVE") {
+    throw new ExpressError("User already exists with the given email.", 400);
   }
+
+  let newRecord;
+  if (userRecord && userRecord.status == "INACTIVE") {
+    //make send_account_creation_mail() into utils/send-mail specific functions and reuse ****
+    const restoredUserRecord = await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        name,
+        email,
+        role: "ADMIN",
+        status: "ACTIVE",
+      },
+    });
+    newRecord = restoredUserRecord;
+  }
+
+  if (!userRecord) {
+    const createdRecord = await prisma.user.create({
+      data: {
+        name,
+        email,
+        role: "ADMIN",
+      },
+    });
+    newRecord = createdRecord;
+  }
+
+  //Admin account can only be created externally by other admin
+  //send mail to user here
+  const mailTemplate = ACCOUNT_CREATED_MAIL_TEMPLATE();
+  const mailOptions = {
+    from: "dep2024.p06@gmail.com",
+    to: email,
+    subject: "Mediease - Account Created",
+    html: mailTemplate,
+    text: "",
+  };
+
+  const info = await sendMail(mailOptions);
+  if (!info) {
+    throw new ExpressError("Error in sending mail to the admin", 500);
+  }
+
+  return res.status(200).json({
+    ok: true,
+    data: newRecord,
+    message: "Admin added successfully",
+  });
 };
 
-// @desc    Update Admin Record
-// route    PUT /api/admin/:id
+// @desc    Update Admin List Record
+// route    PUT /api/admin
 // @access  Private (Admin)
 const updateAdmin = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updatedRecord = await User.findByIdAndUpdate(id, req.body, { new: true });
-    if (!updatedRecord) throw new ExpressError("Record does not exist", 404);
+    const updatedRecord = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...req.body,
+      },
+    });
+
+    // console.log(updatedRecord);
 
     return res.status(200).json({
       ok: true,
       data: updatedRecord,
-      message: "Admin record updated successfully",
+      message: "Admin List record updated successfully",
     });
   } catch (err) {
-    next(new ExpressError("Failed to update admin record", 500));
+    console.log(`Admin List Updating Error : ${err.message}`);
+
+    const errMsg = "Updating admin list record failed, Please try again later";
+    const errCode = 500;
+
+    //record does not exist
+    if (err.code === "P2025") {
+      errMsg = "Record does not exist";
+      errCode = 404;
+    }
+
+    return res.status(errCode).json({
+      ok: false,
+      data: [],
+      message: errMsg,
+    });
   }
 };
 
-// @desc    Delete Admin Record
-// route    DELETE /api/admin/:id
+// @desc    Delete Admin List Record
+// route    DELETE /api/admin
 // @access  Private (Admin)
 const deleteAdmin = async (req, res, next) => {
   try {
+    // console.log("req.body : ", req.body);
     const { id } = req.params;
-    const adminRecord = await User.findById(id);
-    if (!adminRecord) throw new ExpressError("Admin does not exist", 404);
+    const adminRecord = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
 
-    adminRecord.status = "INACTIVE";
-    await adminRecord.save();
+    if (!adminRecord) {
+      throw new ExpressError("Admin does not exist", 404);
+    }
 
+    const deletedRecord = await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status: "INACTIVE",
+      },
+    });
+
+    //send mail to user here
+    const mailTemplate = ACCOUNT_DELETED_MAIL_TEMPLATE();
     const mailOptions = {
       from: "dep2024.p06@gmail.com",
       to: adminRecord.email,
       subject: "Mediease - Account Deleted",
-      html: ACCOUNT_DELETED_MAIL_TEMPLATE(),
+      html: mailTemplate,
+      text: "",
     };
-    await sendMail(mailOptions);
 
+    const info = await sendMail(mailOptions);
+    if (!info) {
+      throw new ExpressError("Error in sending mail to the admin", 500);
+    }
     return res.status(200).json({
       ok: true,
-      data: adminRecord,
-      message: "Admin record deleted successfully",
+      data: deletedRecord,
+      message: "Admin List Record deleted successfully",
     });
   } catch (err) {
-    next(new ExpressError("Failed to delete admin record", 500));
+    console.log(`Admin List Deletion Error : ${err.message}`);
+
+    const errMsg = "Deleting admin list record failed, Please try again later";
+    const errCode = 500;
+
+    //record does not exist
+    if (err.code === "P2025") {
+      errMsg = "Record does not exist";
+      errCode = 404;
+    }
+
+    return res.status(errCode).json({
+      ok: false,
+      data: [],
+      message: errMsg,
+    });
   }
 };
 

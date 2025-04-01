@@ -72,8 +72,9 @@ module.exports.validateStock = (req, res, next) => {
 };
 
 module.exports.validatePatient = (req, res, next) => {
+  // console.log("hello world")
   const { error } = patientSchema.validate(req.body);
-
+  console.log("patient details");
   if (error) {
     const msg = error.details.map((e) => e.message).join(",");
     throw new ExpressError(msg, 400);
@@ -140,9 +141,11 @@ module.exports.validateSendOtp = (req, res, next) => {
   const { error } = sendOtpSchema.validate(req.body);
 
   if (error) {
+    console.log('invalid otp');
     const msg = error.details.map((e) => e.message).join(",");
     throw new ExpressError(msg, 400);
   } else {
+    console.log('valid otp');
     next();
   }
 };

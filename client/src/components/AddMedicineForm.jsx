@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
+import {useDebounce} from 'react-use'
+
 import {
   CardBody,
   Input,
@@ -10,6 +12,8 @@ import {
   CardFooter,
   Option,
   Select as MaterialSelect,
+  input,
+  select,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +21,7 @@ import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
+import { use } from "react";
 
 export function AddMedicineForm() {
   const navigate = useNavigate();
@@ -31,6 +36,24 @@ export function AddMedicineForm() {
   });
 
   const [categories, setCategories] = useState([]);
+  const [brandName, setBrandName] = useState("");
+  const [brandOptions, setBrandOptions] = useState([]);
+  const [selectedBrandName, setSelectedBrandName] = useState(null);
+  // useEffect(() => {
+  //   console.log('updated brand options: ',brandOptions)
+  // }, [brandName])
+
+  useDebounce(async () => {
+    // debounced input
+    if(!brandName) return;
+    const response = await fetchRelatedMedicines(brandName);
+    const data = response.data
+    let options = data.map((brandName) => ({value: brandName, label: brandName}))
+    if(!options.some(option => option.value === brandName)){
+      options.unshift({value: brandName, label: brandName})
+    }
+    setBrandOptions(options);
+  },500,[brandName])
 
   useEffect(
     () => async () => {
@@ -67,12 +90,58 @@ export function AddMedicineForm() {
   };
 
   const handleCategoryChange = (selectedCategory) => {
+    const selectedCategoryvalue = selectedCategory ? selectedCategory : "";
     setFormData((prevData) => ({
       ...prevData,
-      category: selectedCategory,
+      category: selectedCategoryvalue,
     }));
   };
 
+
+  const fetchRelatedMedicines = async (input) => {
+    try{
+        const n = 100;
+        const response = await fetch(`https://rxnav.nlm.nih.gov/REST/approximateTerm.json?term=${input}&maxEntries=${n}`);
+        const resJson = await response.json();
+        const medicines = resJson?.approximateGroup?.candidate;
+        const filteredMeds = medicines.filter(medicine => medicine.name)
+        const names = filteredMeds.map(medicine => medicine.name)
+        return {
+            ok: true,
+            data: names,
+        };
+    } catch(err) {
+        console.log(err);
+        return {
+            ok: false,
+            data: [],
+        }
+    }
+  }
+  
+
+  const handleBrandNameInputChange = (inputBrandName, {action}) => {
+
+    // if(action != 'input-change') return;
+    console.log("handle brand name input change")
+    console.log(inputBrandName)
+    setBrandName(inputBrandName)
+    if(inputBrandName) setBrandOptions([{value: inputBrandName, label: inputBrandName}]);
+    else setBrandOptions([])
+  }
+
+  const handleBrandNameChange = (selectedBrandName) => {
+    console.log(selectedBrandName)
+    setSelectedBrandName(selectedBrandName);
+    const brandNameVal = selectedBrandName.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      brandName: brandNameVal
+    }))
+  }
+
+
+  // const handleBrandNameChange = (inputBrandName) {}
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
@@ -157,7 +226,7 @@ export function AddMedicineForm() {
                         Brand Name <span className="text-red-800">*</span>:
                       </label>
                     </div>
-                    <Input
+                    {/* <Input
                       id="brandName"
                       size="md"
                       label="Brand Name"
@@ -166,7 +235,25 @@ export function AddMedicineForm() {
                       onChange={(e) =>
                         handleChange(e.target.name, e.target.value)
                       }
+                    /> */}
+
+                    <Select
+                      id="brandName"
+                      options={brandOptions}
+                      name="brandname"
+                      value={selectedBrandName}
+                      onInputChange={handleBrandNameInputChange}
+                      onChange={handleBrandNameChange}
+                      placeholder="Brand Name"
+                      isClearable={true}
+                      className="w-full"
                     />
+                    {/* <h1>{brandName}</h1> */}
+                    {/* <div>
+                      {
+                        brandOptions.map((option) => <p>{option.value}</p>)
+                      }
+                    </div> */}
                   </div>
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">

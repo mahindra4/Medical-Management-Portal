@@ -60,7 +60,7 @@ model Supplier {
   city         String?
   state        String
   pinCode      Int?
-  mobileNumber String         @unique    
+  mobileNumber String         @unique
   email        String?
   status       Status         @default(ACTIVE)
   PurchaseList PurchaseList[]
@@ -199,6 +199,21 @@ model CheckupMedicine {
   Checkup  Checkup  @relation(fields: [checkupId], references: [id])
 
   @@map("checkupMedicine")
+}
+
+model DiagnosisSymptoms {
+  id        String @id @default(uuid())
+  diagnosis String
+  symptom   String
+
+  @@map("diagnosis_symptoms")
+}
+
+model Hospitals {
+  id   String @id @default(uuid())
+  name String
+
+  @@map("hospitals")
 }
 
 enum Status {

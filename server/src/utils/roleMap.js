@@ -41,7 +41,7 @@ const roleMapping = new Map([
     // patient routes
     ["GET_PATIENT_LIST", ["D",  "A", "PM"]],
     ["GET_PATIENT", ["D",  "A", "PM"]],
-    ["CREATE_PATIENT", ["D", "A", "PM"]],
+    ["CREATE_PATIENT", ["D", "A", "PM", "P"]], // ---------------------------- added patient -------------------------
     ["UPDATE_PATIENT", ["D", "A", "PM"]],
     ["DELETE_PATIENT", ["D", "A", "PM"]],
 
@@ -95,6 +95,13 @@ const roleMapping = new Map([
     ["CREATE_SUPPLIER", ["A", "PM"]],
     ["UPDATE_SUPPLIER", ["A", "PM"]],
     ["DELETE_SUPPLIER", ["A", "PM"]],
+
+    // diagnosis routes
+    ["GET_DIAGNOSIS_LIST", ["D","PM"]],
+    ["GET_DIAGNOSIS_SYMPTOMS_LIST", ["D","PM"]],
+
+    // hospital routes
+    ["GET_HOSPITAL_LIST", ["D","PM"]],
 ]);
 
 const numToRoleMapping = new Map([
@@ -105,17 +112,18 @@ const numToRoleMapping = new Map([
 ]);
 
 const roleMap = (route) => {
-    let roleArr = [];
+    let roleArr = [];   
     
     if (!roleMapping.has(route)) {
         return roleArr;
     }
 
+    
     roleArr = roleMapping.get(route);
     roleArr = roleArr.map(role => {
         return numToRoleMapping.get(role); 
     });
-     
+
     return roleArr;
 };
 

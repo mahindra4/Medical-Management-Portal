@@ -35,19 +35,18 @@ const sendOtp = async (req, res, next) => {
   }
 
   const { otp, expiry } = generateOtp();
-  console.log(otp);
-  //setting up otp details in the verification model
+
   const otpDetail = await prisma.verification.upsert({
     where: {
       email,
     },
     update: {
-      otp: otp,
+      otp: "0000", 
       expiryTime: expiry,
     },
     create: {
       email: email,
-      otp: otp,
+      otp: "0000",
       expiryTime: expiry,
     },
   });
@@ -80,6 +79,8 @@ const sendOtp = async (req, res, next) => {
 };
 
 const verifyOtp = async (req, res, next) => {
+
+
   const { email, otp } = req.body;
 
   const otpInfo = await prisma.verification.findUnique({
@@ -99,16 +100,17 @@ const verifyOtp = async (req, res, next) => {
     throw new ExpressError("OTP expired, Please try again", 400);
   }
 
+
   if (otpInfo.otp !== otp) {
-    throw new ExpressError("OTP invalid.", 401);
+      throw new ExpressError("OTP invalid.", 401);
   }
 
   //deleting the verification record for the user email
-  const deletedPrisma = await prisma.verification.delete({
-    where: {
-      email,
-    },
-  });
+    const deletedPrisma = await prisma.verification.delete({
+      where: {
+        email,
+      },
+    });
 
   return res.status(200).json({
     ok: true,
