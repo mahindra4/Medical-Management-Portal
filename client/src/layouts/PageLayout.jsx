@@ -695,6 +695,12 @@ const Layout = ({ children }) => {
                           >
                             Prescription List
                           </ListItem>}
+                          {hasRequiredRole(roleArr, ["PRESCRIPTION_LIST"]) && <ListItem
+                            className="ml-9"
+                            onClick={() => navigate("/patient_vitals/")}
+                          >
+                            Patient Vitals
+                          </ListItem>}
                         </List>
                       </AccordionBody>
                     )}

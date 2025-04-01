@@ -53,6 +53,7 @@ const roleMapping = new Map([
     [30, "ADMIN_PROFILE"],
     [31, "PRESCRIPTION_DETAIL"],
     [32, "PURCHASE_DETAIL"],
+    [33, "PATIENT_VITALS"],
 ]);
 
 const roleMap = (role) => {
@@ -60,8 +61,8 @@ const roleMap = (role) => {
         return [];
     }
     const admin = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 26, 30, 31, 32];
-    const paramedical = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 28, 30, 31, 32];
-    const doctor = [1, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 21, 22, 28, 30, 31, 32];
+    const paramedical = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 28, 30, 31, 32, 33];
+    const doctor = [1, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 21, 22, 28, 30, 31, 32, 33];
     const patient = [25, 27, 29, 30, 31];  //Temp solution: patient is also allowed the access of 18 (prescription list), as he/she has to give access to medical history
 
     let roleArr = [];

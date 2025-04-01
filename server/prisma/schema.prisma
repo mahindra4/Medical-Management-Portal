@@ -159,6 +159,7 @@ model Patient {
   allergy            String?
   Checkup            Checkup[]
   status             Status          @default(ACTIVE)
+  PatientVitals      PatientVitals[]
 
   @@map("patient")
 }
@@ -186,6 +187,20 @@ model Checkup {
   CheckupMedicine CheckupMedicine[]
 
   @@map("checkup")
+}
+
+model PatientVitals {
+  id            String   @id @default(uuid())
+  patientId     String
+  temperature   Float?
+  date          DateTime
+  bloodPressure String?
+  pulseRate     Int?
+  spO2          Float?
+
+  Patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("patient_vitals")
 }
 
 model CheckupMedicine {

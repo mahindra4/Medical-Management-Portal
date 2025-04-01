@@ -404,6 +404,45 @@ export default function AddPrescriptionForm() {
 
   };
 
+  const handleSave = async (e) => {
+    console.log('handle save')
+    e.preventDefault();
+    const checkupListEntry = {
+      patientId: selectedPatient?.value?.id,
+      date: formData.date,
+    };
+
+    if (formData.temperature) {
+      checkupListEntry.temperature = formData.temperature;
+    }
+
+    if (formData.pulseRate) {
+      checkupListEntry.pulseRate = formData.pulseRate;
+    }
+
+    if (formData.spO2) {
+      checkupListEntry.spO2 = formData.spO2;
+    }
+
+    if (formData.bloodPressure) {
+      checkupListEntry.bloodPressure = formData.bloodPressure;
+    }
+
+    console.log("Sending data:", checkupListEntry);
+
+    try{
+      const response = await axios.post(apiRoutes.patientVitals + "/save", checkupListEntry, {
+        withCredentials: true,
+      });
+      console.log("Save successful:", response.data);
+      toast.success("Vitals saved successfully!");
+    } catch(error) {
+      console.error("Error saving vitals:", error.response?.data || error.message);
+      toast.error(`Error: ${error.response?.data?.message || "Something went wrong"}`);
+    }
+
+  }
+
   const handleSubmit = async (e) => {
     console.log('handle Submit')
     e.preventDefault();
@@ -536,6 +575,14 @@ export default function AddPrescriptionForm() {
                     }}
                   >
                     Prescription List
+                  </Button>
+
+                  <Button
+                    className="flex items-center gap-3"
+                    size="md"
+                    onClick={handleSave}
+                  >
+                    save
                   </Button>
                 </div>
               </div>
