@@ -216,6 +216,49 @@ model Hospitals {
   @@map("hospitals")
 }
 
+model PatientObservation {
+  id          String               @id @default(uuid())
+  patientId   String
+  patient     Patient              @relation(fields: [patientId], references: [id])
+  startDate   DateTime
+  endDate     DateTime?
+  status      ObservationStatus    @default(ACTIVE)
+  details     ObservationDetail[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@map("patient_observation")
+}
+
+model ObservationDetail {
+  id                  String             @id @default(uuid())
+  observationId       String
+  observation         PatientObservation @relation(fields: [observationId], references: [id])
+  medicineId          String?
+  medicine            Medicine?          @relation(fields: [medicineId], references: [id])
+  equipmentType       EquipmentType?
+  dosage              String
+  frequency           String
+  totalDailyQuantity  Int
+  remainingQuantity   Int
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@map("observation_detail")
+}
+
+enum ObservationStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum EquipmentType {
+  SALINE
+  INJECTION
+  OTHER
+}
+
 enum Status {
   ACTIVE
   INACTIVE
