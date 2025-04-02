@@ -22,6 +22,7 @@ import {
 
 const TABLE_HEAD = {
     id: "#",
+    opd: "OPD",
     patientName: "Patient Name",
     temperature: "Temperature",
     date: "Date",
@@ -110,7 +111,7 @@ export default function PatientVitalsList() {
             // text="Add Prescription"
             // addLink="/prescription/add"
             handleDelete={handlePrescriptionDelete}
-            searchKey="patientName"
+            searchKey="opd"
             handleDetail={handlePrescriptionDetail}
             detailsFlag={true}
             handleUpdate={handlePrescriptionUpdate}

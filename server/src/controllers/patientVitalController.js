@@ -24,7 +24,7 @@ const getPatientVitalsList = async (req, res) => {
         }
 
         const restructuredVitalsList = vitalsList.map((vitals) => ({
-            id: vitals?.id,
+            opd: vitals?.id,
             patientName: vitals.Patient?.name,
             date: vitals.date.toISOString().split("T")[0],
             time: formatTimeFromISO(vitals.date),
