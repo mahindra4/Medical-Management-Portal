@@ -43,7 +43,7 @@ export default function AddPrescriptionForm() {
     diagnosis: "",
     referredHospital: "",
     referredDoctor: "",
-    isUnderObservation: false, // NEW: Added observation status
+    isUnderObservation: false, //  Added observation status
   });
 
   const [doctors, setDoctors] = useState([]);
@@ -59,11 +59,15 @@ export default function AddPrescriptionForm() {
 //
   const [observationDetails, setObservationDetails] = useState([]);
   const [showObservationForm, setShowObservationForm] = useState(false);
+  const [medicalItems, setMedicalItems] = useState([]); // Combined medicines and equipment
+  
   const OBSERVATION_TABLE_HEAD = [
-    "Medicine/Equipment",
-    "Dosage",
-    "Frequency",
-    "Daily Quantity",
+    "Medicine",
+    "Dosage ",
+    "Frequency ",
+    "Daily Qty",
+    "Avl. Qty",    
+    "Days",        
     "Action",
   ];
 
@@ -92,6 +96,15 @@ export default function AddPrescriptionForm() {
   const HANDLE_HOSPITAL_CHANGE = "handleHospitalChange";
   //
   const HANDLE_OBSERVATION_CHANGE = "handleObservationChange";
+  const [currentObservationItem, setCurrentObservationItem] = useState({
+    medicineId: "",
+    name: "",
+    dosage: "",
+    frequency: "",
+    dailyQuantity: "",
+    days: 1,
+    availableQty: 0
+  });
   useEffect(
     () => async () => {
       // Fetch doctors list when the component mounts
@@ -114,6 +127,7 @@ export default function AddPrescriptionForm() {
       //
       const observationData = sessionStorage.getItem(HANDLE_OBSERVATION_CHANGE);
       //
+      // Update the observation data parsing:
       if (observationData) {
         const parsedData = JSON.parse(observationData);
         setFormData(prev => ({
@@ -409,6 +423,20 @@ export default function AddPrescriptionForm() {
     });
   };
 
+  //
+  const handleObservationMedicineChange = (selectedMedicine) => {
+    const selectedMed = medicines.find(m => m.value === selectedMedicine.value);
+    
+    setCurrentObservationItem({
+      ...currentObservationItem,
+      medicineId: selectedMedicine.value,
+      name: selectedMedicine.label,       // Store name for display
+      availableQty: selectedMed.quantity, // Populate available quantity
+      dailyQuantity: "",                  // Reset daily quantity
+    });
+  };
+//  
+
   const handleChange = (name, value) => {
     console.log('handle Change')
     // console.log(e.target);
@@ -436,12 +464,16 @@ export default function AddPrescriptionForm() {
     e.preventDefault();
     // Here you can handle the submission of the form
     console.log(formData.diagnosis)
+    if (formData.isUnderObservation && observationDetails.length === 0) {
+      toast.error("Please add at least 1 medicine for observation patients");
+      return;
+    }
     const checkupListEntry = {
       patientId: selectedPatient?.value?.id,
       date: formData.date,
       diagnosis: formData.diagnosis,
       
-      isUnderObservation: formData.isUnderObservation, // NEW: Add observation status
+      isUnderObservation: formData.isUnderObservation, //  Add observation status
     };
     //optional fields
     if (selectedDoctor?.value) {
@@ -480,16 +512,19 @@ export default function AddPrescriptionForm() {
     });
 
     // Prepare observation data if needed
+    // 
     let observationData = null;
     if (formData.isUnderObservation) {
       observationData = observationDetails.map(detail => ({
-        medicineId: detail.medicineId || null,
-        equipmentType: detail.equipmentType || null,
-        dosage: detail.dosage,
-        frequency: detail.frequency,
-        totalDailyQuantity: parseInt(detail.totalDailyQuantity) || 1,
+        medicineId: detail.medicineId,
+        dosage: detail.dosage === null ? undefined : (detail.dosage || ''),      
+        frequency: detail.frequency || null ? undefined : (detail.frequency || ''),
+        dailyQuantity: parseInt(detail.dailyQuantity) || 1,
+        days: parseInt(detail.days) || 1  ,  
+        availableQty : parseInt(detail.availableQty) 
       }));
     }
+    
     const data = {
       ...checkupListEntry,
       staffEmail: userEmail,
@@ -546,18 +581,39 @@ export default function AddPrescriptionForm() {
   };
 
   const addObservationDetail = () => {
-    const newDetails = [
-      ...observationDetails,
-      {
-        medicineId: "",
-        equipmentType: "",
-        dosage: "",
-        frequency: "",
-        totalDailyQuantity: 1,
-      },
-    ];
-    setObservationDetails(newDetails);
-    saveObservationData(); // Save to session storage
+    if (!currentObservationItem.medicineId) {
+      toast.error("Please select a medicine");
+      return;
+    }
+    //if (!currentObservationItem.dailyQuantity) {
+    //  toast.error("Please enter daily quantity");
+    //  return;
+    //}
+    
+    // Find the selected medicine
+    const selectedMed = medicines.find(m => m.medicineId === currentObservationItem.medicineId);
+  
+    // Add to observationDetails
+    setObservationDetails([...observationDetails, {
+      medicineId: currentObservationItem.medicineId,
+      name: selectedMed?.medicineName || "",
+      dosage: currentObservationItem.dosage || "",
+      frequency: currentObservationItem.frequency || "",
+      dailyQuantity: currentObservationItem.dailyQuantity,
+      days: currentObservationItem.days,
+      availableQty: selectedMed?.netQuantity || 0
+    }]);
+  
+    // Reset input fields
+    setCurrentObservationItem({
+      medicineId: null,
+      name: "",
+      dosage: "",
+      frequency: "",
+      dailyQuantity: "",
+      days: 1,
+      availableQty: 0
+    });
   };
 
   const updateObservationDetail = (index, field, value) => {
@@ -894,7 +950,7 @@ export default function AddPrescriptionForm() {
                               className="font-normal leading-none opacity-70"
                             >
                               {head}
-                              {head !== "Dosage" && head !== "Action" && (
+                              { head !== "Action" && (
                                 <span className="text-red-800">*</span>
                               )}
                             </Typography>
@@ -994,146 +1050,189 @@ export default function AddPrescriptionForm() {
 
                 {/* New Observation Treatment Plan Section */}
                 {formData.isUnderObservation && (
-                  <div className="w-full mt-6">
-                    <Typography variant="h6" color="blue-gray" className="mb-4">
-                      Observation Treatment Plan
-                    </Typography>
-                    <table className="w-full min-w-max table-auto text-left">
-                      <thead>
-                        <tr>
-                          {OBSERVATION_TABLE_HEAD.map((head) => (
-                            <th
-                              key={head}
-                              className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                <div className="w-full mt-6">
+                  <Typography variant="h6" color="blue-gray" className="mb-4">
+                    Observation Treatment Plan
+                  </Typography>
+                  
+                  <table className="w-full min-w-max table-auto text-left">
+                    <thead>
+                      <tr>
+                        {OBSERVATION_TABLE_HEAD.map((head) => (
+                          <th
+                            key={head}
+                            className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                          >
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-normal leading-none opacity-70"
                             >
-                              <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal leading-none opacity-70"
-                              >
-                                {head}
-                                {head !== "Action" && <span className="text-red-800">*</span>}
-                              </Typography>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {observationDetails.map((detail, index) => (
-                          <tr key={index} className="even:bg-blue-gray-50">
-                            <td className="p-4">
-                              <div className="grid grid-cols-1 gap-2">
-                                <Select
-                                  options={medicines.map(medicine => ({
-                                    value: medicine.medicineId,
-                                    label: `${medicine.medicineName}`
-                                  }))}
-                                  value={detail.medicineId ? { 
-                                    value: detail.medicineId, 
-                                    label: medicines.find(m => m.medicineId === detail.medicineId)?.medicineName 
-                                  } : null}
-                                  onChange={(selected) => 
-                                    updateObservationDetail(index, 'medicineId', selected?.value)
-                                  }
-                                  isDisabled={!!detail.equipmentType}
-                                  placeholder="Select Medicine"
-                                  className="w-full"
-                                />
-                                <Select
-                                  options={[
-                                    { value: 'SALINE', label: 'Saline' },
-                                    { value: 'INJECTION', label: 'Injection' },
-                                    { value: 'OTHER', label: 'Other Equipment' }
-                                  ]}
-                                  value={detail.equipmentType ? { 
-                                    value: detail.equipmentType, 
-                                    label: detail.equipmentType 
-                                  } : null}
-                                  onChange={(selected) => 
-                                    updateObservationDetail(index, 'equipmentType', selected?.value)
-                                  }
-                                  isDisabled={!!detail.medicineId}
-                                  placeholder="Select Equipment"
-                                  className="w-full mt-2"
-                                />
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <Input
-                                type="text"
-                                size="md"
-                                value={detail.dosage}
-                                onChange={(e) => 
-                                  updateObservationDetail(index, 'dosage', e.target.value)
-                                }
-                                placeholder="e.g., 500mg"
-                              />
-                            </td>
-                            <td className="p-4">
-                              <Input
-                                type="text"
-                                size="md"
-                                value={detail.frequency}
-                                onChange={(e) => 
-                                  updateObservationDetail(index, 'frequency', e.target.value)
-                                }
-                                placeholder="e.g., Every 6 hours"
-                              />
-                            </td>
-                            <td className="p-4">
-                              <Input
-                                type="number"
-                                min="1"
-                                size="md"
-                                value={detail.totalDailyQuantity}
-                                onChange={(e) => 
-                                  updateObservationDetail(index, 'totalDailyQuantity', e.target.value)
-                                }
-                              />
-                            </td>
-                            <td className="p-4">
-                              <Tooltip content="Delete">
-                                <IconButton
-                                  variant="text"
-                                  onClick={() => removeObservationDetail(index)}
-                                >
-                                  <TrashIcon className="h-4 w-4" />
-                                </IconButton>
-                              </Tooltip>
-                            </td>
-                          </tr>
+                              {head}
+                              
+                            </Typography>
+                          </th>
                         ))}
-                        <tr>
-                          <td colSpan="5" className="p-4">
-                            <div className="flex justify-center items-center gap-2">
-                              <Tooltip content="Add Observation Item">
-                                <IconButton variant="text" onClick={addObservationDetail}>
-                                  <PlusCircleIcon className="h-5 w-5" />
-                                </IconButton>
-                              </Tooltip>
-                            </div>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Existing Observation Items */}
+                      {observationDetails.map((detail, index) => (
+                        <tr key={index} className="even:bg-blue-gray-50/50">
+                          <td className="p-4">{detail.name}</td>
+                          <td className="p-4">{detail.dosage || ""}</td>
+                          <td className="p-4">
+                            <select
+                              className="w-full border border-gray-300 rounded p-2"
+                              value={detail.frequency}
+                              onChange={(e) => updateObservationDetail(index, 'frequency', e.target.value)}
+                            >
+                              <option value="">Select Frequency</option>
+                              <option value="OD">Once Daily (OD)</option>
+                              <option value="BD">Twice Daily (BD)</option>
+                              <option value="TDS">Thrice Daily (TDS)</option>
+                              <option value="QID">Four Times Daily (QID)</option>
+                              <option value="HS">At Bedtime (HS)</option>
+                              <option value="SOS">As Needed (SOS)</option>
+                            </select>
+                          </td>
+                          <td className="p-4">{detail.dailyQuantity}</td>
+                          <td className="p-4">{detail.availableQty}</td>
+                          <td className="p-4">{detail.days}</td>
+                          <td className="p-4">
+                            <Tooltip content="Delete">
+                              <IconButton
+                                variant="text"
+                                color="red"
+                                onClick={() => removeObservationDetail(index)}
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
                           </td>
                         </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </form>
-            </CardBody>
-            <CardFooter divider={true}>
-              <div className="flex justify-end">
-                <Button
-                  className="flex items-center gap-3"
-                  size="lg"
-                  onClick={handleSubmit}
-                >
-                  Save
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </Layout>
-      )}
-    </>
-  );
+                      ))}
+
+                      {/* Add New Item Row (not part of observationDetails) */}
+                      <tr className="even:bg-blue-gray-50/50">
+                      <td className="p-4">
+                          <Select
+                            options={medicines.map(m => ({
+                              value: m.medicineId,
+                              label: m.medicineName,
+                              quantity: m.netQuantity
+                            }))}
+                            value={currentObservationItem.medicineId ? 
+                              { 
+                                value: currentObservationItem.medicineId, 
+                                label: currentObservationItem.name 
+                              } 
+                              : null}
+                            onChange={(selected) => {
+                              const med = medicines.find(m => m.medicineId === selected?.value);
+                              setCurrentObservationItem({
+                                ...currentObservationItem,
+                                medicineId: selected?.value,
+                                name: selected?.label,
+                                availableQty: med?.netQuantity || 0
+                              });
+                            }}
+                            placeholder="Select Medicine"
+                            className="w-full"
+                            required
+                          />
+                        </td>
+                        <td className="p-4">
+                          <Input
+                            type="text"
+                            size="md"
+                            value={currentObservationItem.dosage}
+                            onChange={(e) => setCurrentObservationItem({
+                              ...currentObservationItem,
+                              dosage: e.target.value || undefined 
+                            })}
+                            placeholder="Optional"
+                            className="!border !border-gray-300"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <select
+                            className="w-full border border-gray-300 rounded p-2"
+                            value={currentObservationItem.frequency}
+                            onChange={(e) => setCurrentObservationItem({
+                              ...currentObservationItem,
+                              frequency: e.target.value
+                            })}
+                          >
+                            <option value="">Select Frequency</option>
+                            <option value="OD">Once Daily (OD)</option>
+                            <option value="BD">Twice Daily (BD)</option>
+                            <option value="TDS">Thrice Daily (TDS)</option>
+                            <option value="QID">Four Times Daily (QID)</option>
+                            <option value="HS">At Bedtime (HS)</option>
+                            <option value="SOS">As Needed (SOS)</option>
+                          </select>
+                        </td>
+                        <td className="p-4">
+                          <Input
+                            type="number"
+                            min="1"
+                            size="md"
+                            value={currentObservationItem.dailyQuantity}
+                            onChange={(e) => setCurrentObservationItem({
+                              ...currentObservationItem,
+                              dailyQuantity: e.target.value
+                            })}
+                            className="!border !border-gray-300"
+                            required
+                          />
+                        </td>
+                        <td className="p-4">
+                          {currentObservationItem.availableQty || "-"}
+                        </td>
+                        <td className="p-4">
+                          <Input
+                            type="number"
+                            min="1"
+                            size="md"
+                            value={currentObservationItem.days}
+                            onChange={(e) => setCurrentObservationItem({
+                              ...currentObservationItem,
+                              days: e.target.value
+                            })}
+                            className="!border !border-gray-300"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <IconButton 
+                            variant="text" 
+                            onClick={addObservationDetail}
+                            disabled={!currentObservationItem.medicineId || !currentObservationItem.dailyQuantity}
+                          >
+                            <PlusCircleIcon className="h-5 w-5" />
+                          </IconButton>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </form>
+          </CardBody>
+          <CardFooter divider={true}>
+            <div className="flex justify-end">
+              <Button
+                className="flex items-center gap-3"
+                size="lg"
+                onClick={handleSubmit}
+              >
+                Save
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      </Layout>
+    )}
+  </>
+);
 }

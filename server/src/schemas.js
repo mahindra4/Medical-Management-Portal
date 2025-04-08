@@ -97,7 +97,20 @@ const categorySchema = Joi.object({
   //   Medicine: Joi.array().items(Joi.object()),
 });
 
-
+// schema 
+const observationItemSchema = Joi.object({
+  //
+  medicineId: Joi.string().optional(),
+  dosage: Joi.string().allow('').optional(),
+  frequency: Joi.string().allow('').optional(),
+  //
+  //dailyQuantity: Joi.number().integer().min(1).optional(),
+  dailyQuantity: Joi.number().integer().optional(),
+  //
+  //days: Joi.number().integer().min(1).optional(),
+  days: Joi.number().integer().optional(),
+  availableQty: Joi.number().integer().optional()
+});
 
 // Patient Schema
 const patientSchema = Joi.object({
@@ -143,22 +156,41 @@ const checkupMedicinesSchema = Joi.object({
 });
 
 // Checkup Schema
+// 
 const checkupSchema = Joi.object({
   patientId: Joi.string().required(),
   staffEmail: Joi.string().email().required(),
   temperature: Joi.number().allow(null).allow('').optional(),
-  pulseRate : Joi.number().integer().allow(null).allow('').optional(),
-  spO2: Joi.number().min(0).max(100).allow(null).allow('').optional(),  //is a percentage value
-  bloodPressure: Joi.string().allow(null).allow('').optional(), //mm Hg
+  pulseRate: Joi.number().integer().allow(null).allow('').optional(),
+  spO2: Joi.number().min(0).max(100).allow(null).allow('').optional(),
+  bloodPressure: Joi.string().allow(null).allow('').optional(),
   date: Joi.date().required(),
   doctorId: Joi.string().allow(null).allow('').optional(),
   symptoms: Joi.string().allow(null).allow('').optional(),
   diagnosis: Joi.string().required(),
   checkupMedicines: Joi.array().items(checkupMedicinesSchema).required(),
   referredDoctor: Joi.string().allow(null).allow('').optional(),
-  referredHospital: Joi.string().allow(null).allow('').optional()
+  referredHospital: Joi.string().allow(null).allow('').optional(),
+  isUnderObservation: Joi.boolean().default(false),
+  observationDetails: Joi.when('isUnderObservation', {
+    is: true,
+    then: Joi.array().items(
+      Joi.object({
+        medicineId: Joi.string().required(),
+        dosage: Joi.string().allow('', null).optional(),
+        frequency: Joi.string().allow('', null).optional(),
+        dailyQuantity: Joi.number().integer().min(1).required(),
+        days: Joi.number().integer().min(1).required(),
+        availableQty: Joi.number().integer().optional()
+      })
+    ).min(1).required().messages({
+      'array.base': 'Observation details must be an array of objects when patient is under observation',
+      'array.min': 'At least one observation medicine is required when patient is under observation',
+      'any.required': 'Observation details are required when patient is under observation'
+    }),
+    otherwise: Joi.array().optional().allow(null)
+  })
 });
-
 const sendOtpSchema = Joi.object({
   email: Joi.string().email().required(),
   // role: Joi.string().required().valid('DOCTOR', 'PATIENT', 'ADMIN', 'PARAMEDICAL'),
@@ -196,6 +228,5 @@ module.exports = {
   sendOtpSchema,
   verifyOtpSchema,
   userSchema,
-  checkupSchema,
   feedbackSchema
 };

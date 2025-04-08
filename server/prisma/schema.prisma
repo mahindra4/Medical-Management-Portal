@@ -47,6 +47,7 @@ model Medicine {
   Stock           Stock[]
   Purchases       Purchase[]
   CheckupMedicine CheckupMedicine[]
+  ObservationDetails ObservationDetails[]
   status          Status            @default(ACTIVE)
   Category        Category          @relation(fields: [categoryId], references: [id])
 
@@ -184,7 +185,7 @@ model Checkup {
   Staff  Staff  @relation("StaffCheckups", fields: [staffId], references: [id])
 
   CheckupMedicine CheckupMedicine[]
-
+  PatientUnderObs PatientUnderObs?
   @@map("checkup")
 }
 
@@ -216,42 +217,37 @@ model Hospitals {
   @@map("hospitals")
 }
 
-model PatientObservation {
-  id          String               @id @default(uuid())
-  patientId   String
-  patient     Patient              @relation(fields: [patientId], references: [id])
-  startDate   DateTime
-  endDate     DateTime?
-  status      ObservationStatus    @default(ACTIVE)
-  details     ObservationDetail[]
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+// Add these models to your existing schema
 
-  @@map("patient_observation")
+model PatientUnderObs {
+  id               String             @id @default(uuid())
+  checkupId        String             @unique
+  checkup          Checkup            @relation(fields: [checkupId], references: [id])
+  observationId    String             @unique
+  observation      ObservationDetails @relation(fields: [observationId], references: [id])
+  isUnderObservation Boolean          @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@map("patient_under_obs")
 }
 
-model ObservationDetail {
-  id                  String             @id @default(uuid())
-  observationId       String
-  observation         PatientObservation @relation(fields: [observationId], references: [id])
-  medicineId          String?
-  medicine            Medicine?          @relation(fields: [medicineId], references: [id])
-  equipmentType       EquipmentType?
-  dosage              String
-  frequency           String
-  totalDailyQuantity  Int
-  remainingQuantity   Int
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
+model ObservationDetails {
+  id                String           @id @default(uuid())
+  medicineId        String?
+  medicine          Medicine?        @relation(fields: [medicineId], references: [id])
+  dosage            String?
+  frequency         String?
+  dailyQuantity     Int
+  days              Int
+  availableQuantity Int
+  patientUnderObs   PatientUnderObs?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
-  @@map("observation_detail")
+  @@map("observation_details")
 }
 
-enum ObservationStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
 
 enum EquipmentType {
   SALINE

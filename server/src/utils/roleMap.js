@@ -20,6 +20,12 @@ const roleMapping = new Map([
     ["UPDATE_CHECKUP", ["D", "A", "PM"]],
     ["DELETE_CHECKUP", ["D", "A", "PM"]],
 
+    // observation routes
+    ["CREATE_OBSERVATION", ["D", "PM"]],
+    ["GET_OBSERVATION", ["D", "PM"]],
+    ["UPDATE_OBSERVATION", ["D", "PM"]],
+    ["DELETE_OBSERVATION", ["D", "PM"]],
+
     // dashboard routes
     ["GET_CHECKUP_STAT", ["D", "A", "PM"]],
     ["GET_TOP_MEDICINE_STAT", ["D", "A", "PM"]],
@@ -41,7 +47,7 @@ const roleMapping = new Map([
     // patient routes
     ["GET_PATIENT_LIST", ["D",  "A", "PM"]],
     ["GET_PATIENT", ["D",  "A", "PM"]],
-    ["CREATE_PATIENT", ["D", "A", "PM", "P"]], // ---------------------------- added patient -------------------------
+    ["CREATE_PATIENT", ["D", "A", "PM", "P"]],
     ["UPDATE_PATIENT", ["D", "A", "PM"]],
     ["DELETE_PATIENT", ["D", "A", "PM"]],
 
@@ -118,7 +124,6 @@ const roleMap = (route) => {
         return roleArr;
     }
 
-    
     roleArr = roleMapping.get(route);
     roleArr = roleArr.map(role => {
         return numToRoleMapping.get(role); 
