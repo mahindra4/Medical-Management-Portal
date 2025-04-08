@@ -47,6 +47,8 @@ import UpdateStaff from "./pages/UpdateStaff";
 import UpdateMedicine from "./pages/UpdateMedicine";
 import UpdatePurchase from "./pages/UpdatePurchase";
 import UpdatePrescription from "./pages/UpdatePrescription";
+import ObservationList from "./pages/ObservationList";
+import ObservationDetail from "./pages/ObservationDetail"; 
 
 function App() {
   const { userRole } = useAuthContext();
@@ -58,17 +60,25 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={!userRole ? <SignInPage /> : <Home />} />
           <Route path="/signup" element={!userRole ? <SignUpPage /> : <Home />} />
-          {/* <Route path="/profile/staff" element={
-            <ProtectedRoute routeName="STAFF_PROFILE">
-              <StaffProfile />
+          
+          {/* Observation Routes */}
+          <Route path="/observation" element={
+            <ProtectedRoute routeName="OBSERVATION_LIST">
+              <ObservationList />
             </ProtectedRoute>
           } />
-          <Route path="/profile/patient" element={
-            <ProtectedRoute routeName="PATIENT_PROFILE">
-              <PatientProfile />
+          <Route path="/observation/:id" element={
+            <ProtectedRoute routeName="OBSERVATION_DETAIL">
+              <ObservationDetail />
             </ProtectedRoute>
-          } /> */}
+          } />
+          <Route path="/observation/update/:id" element={
+            <ProtectedRoute routeName="UPDATE_OBSERVATION">
+              <UpdatePrescription /> {/* Or create a separate UpdateObservation component */}
+            </ProtectedRoute>
+          } />
 
+          {/* Profile Routes */}
           <Route path="/profile/staff" element={
             <ProtectedRoute routeName="STAFF_PROFILE">
               <StaffProfile />
@@ -99,6 +109,8 @@ function App() {
               <AdminProfile edit={true} />
             </ProtectedRoute>
           } />
+
+          {/* Pharmacy Routes */}
           <Route path="/pharmadashboard" element={
             <ProtectedRoute routeName="PHARMA_DASHBOARD">
               <PharmaDashboard />
@@ -164,6 +176,8 @@ function App() {
               <OutOfStock />
             </ProtectedRoute>
           } />
+
+          {/* Patient Routes */}
           <Route path="/patient/add" element={
             <ProtectedRoute routeName="ADD_PATIENT">
               <AddPatient />
@@ -174,18 +188,15 @@ function App() {
               <PatientList />
             </ProtectedRoute>
           } />
+          <Route path="/patient/profile" element={
+            <CompleteProfilePatient />
+          } />
+
+          {/* Doctor Routes */}
           <Route path="/doctordashboard" element={
             <ProtectedRoute routeName="DOCTOR_DASHBOARD">
               <DoctorDashboard />
             </ProtectedRoute>
-          } />
-          {/* <Route path="/patient/profile" element={
-            <ProtectedRoute routeName="PATIENT">
-              <CompleteProfilePatient />
-            </ProtectedRoute>
-          } /> */}
-          <Route path="/patient/profile" element={
-            <CompleteProfilePatient />
           } />
           <Route path="/prescription" element={
             <ProtectedRoute routeName="PRESCRIPTION_LIST">
@@ -222,6 +233,8 @@ function App() {
               <AddSchedule />
             </ProtectedRoute>
           } />
+
+          {/* Staff Routes */}
           <Route path="/staff" element={
             <ProtectedRoute routeName="STAFF_LIST">
               <StaffList />
@@ -232,14 +245,11 @@ function App() {
               <AddStaff />
             </ProtectedRoute>
           } />
-          {/* <Route path="/staff/profile" element={
-            <ProtectedRoute routeName="STAFF">
-              <CompleteProfileStaff />
-            </ProtectedRoute>
-          } /> */}
           <Route path="/staff/profile" element={
             <CompleteProfileStaff />
           } />
+
+          {/* Admin Routes */}
           <Route path="/admin" element={
             <ProtectedRoute routeName="ADMIN_LIST">
               <AdminList />
@@ -261,6 +271,7 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* Update Routes */}
           <Route path="/medicine/category/update/:id" element={
             <ProtectedRoute routeName="ADD_CATEGORY">
               <UpdateCategory />
