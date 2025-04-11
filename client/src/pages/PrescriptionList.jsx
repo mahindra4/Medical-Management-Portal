@@ -76,6 +76,39 @@ export default function PrescriptionList() {
     setFilteredPrescription(filteredData);
   }, [fromDate, toDate, prescription]);
 
+  const handlePrescriptionDelete = async (e, id) => {
+      try {
+        const res = await axios.delete(`${apiRoutes.checkup}/${id}`, {
+          withCredentials: true
+        });
+        const { data } = res;
+  
+        if (data?.ok) {
+          console.log(`MESSAGE : ${data?.message}`);
+          toast.success(data?.message);
+          setPrescription((prev) => prev.filter((p) => p.id !== id));
+        } else {
+          // TODO: show an error message
+          console.log(`ERROR (prescription_list_delete): ${data.message}`);
+          toast.error(
+            "Failed to delete prescription"
+          );
+        }
+      } catch (err) {
+        console.error(
+          `ERROR (prescription_list_delete): ${err?.response?.data?.message}`
+        );
+      }
+    };
+    const handlePrescriptionDetail = async (e, id, idx) => {
+      console.log("Prescription Detail", id, idx);
+      navigate(`/prescription/${id}^${idx}`);
+    };
+    const handlePrescriptionUpdate = async (id) => {
+      console.log("Prescription Edit", id);
+      navigate(`/prescription/update/${id}`);
+    };
+
   return (
     <>
       {loading && <SyncLoadingScreen />}
@@ -102,7 +135,7 @@ export default function PrescriptionList() {
             </div>
 
             {/* Prescription Table */}
-            <SortableTable
+            {/* <SortableTable
               tableHead={TABLE_HEAD}
               title="Prescription List"
               data={filteredPrescription}  // Use filtered & sorted data
@@ -111,7 +144,21 @@ export default function PrescriptionList() {
               addLink="/prescription/add"
               searchKey="patientName"
               defaultSortOrder="date"
-            />
+            /> */}
+
+            <SortableTable
+                tableHead={TABLE_HEAD}
+                title="Prescription List"
+                data={filteredPrescription}
+                searchKey="patientName"
+                detail="See information about all OPDs."
+                addLink="/prescription/add"
+                handleDelete={handlePrescriptionDelete}
+                handleDetail={handlePrescriptionDetail}
+                handleUpdate={handlePrescriptionUpdate}
+                detailsFlag={true}
+                defaultSortOrder="date"
+              />
           </Layout>
         </div>
       )}

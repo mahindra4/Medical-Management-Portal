@@ -206,6 +206,7 @@ const getMedicalHistory = async (req, res, next) => {
 
 const createCheckup = async (req, res, next) => {
   const {
+    id,
     patientId,
     doctorId,
     staffEmail,
@@ -388,6 +389,7 @@ const createCheckup = async (req, res, next) => {
 
   const createdCheckup = await prisma.checkup.create({
     data: {
+      id,
       patientId,
       doctorId,
       staffId: staff.id,

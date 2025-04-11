@@ -16,7 +16,7 @@ import {
   Textarea,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
 import { useAuthContext } from "../hooks/useAuthContext";
@@ -24,7 +24,9 @@ import Layout from "../layouts/PageLayout";
 import { SyncLoadingScreen } from "./UI/LoadingScreen";
 import { use } from "react";
 
-export default function AddPrescriptionForm() {
+export default function UpdatePatientVitalsForm() {
+
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { userEmail } = useAuthContext();
@@ -46,14 +48,13 @@ export default function AddPrescriptionForm() {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState({});
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [diagnosisSymptomsList, setDiagnosisSymptomsList] = useState({});
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
   const [symptom, setSymptom] = useState("")
   const [hosptialList, setHospitalList] = useState([]);
   const [selectedHospital, setSelectedHospital] = useState({});
-  const [receivedOpdId, setReceivedOpdId] = useState("");
 
   const TABLE_HEAD = [
     "Medicine Name",
@@ -69,17 +70,6 @@ export default function AddPrescriptionForm() {
   const [medicines, setMedicines] = useState([]);
   const [selectedMedicine, setSelectedMedicine] = useState("");
 
-  const FORM_STORAGE_KEY = "prescriptionFormData";
-  const HANDLE_INPUT_CHANGE_KEY = "handleInputChange";
-  const HANDLE_SELECTED_MEDICINE = "handleSelectedMedicine";
-  const HANDLE_PATIENT_EMAIL = "handlePatientEmail";
-  const HANDLE_DOCTOR_EMAIL = "handleDoctorEmail";
-  const HANDLE_DIAGNOSIS_CHANGE = "handleDiagnosisChange";
-  const HANDLE_DIAGNOSIS_VALUE_CHANGE = "handleDiagnosisValueChange";
-  const HANDLE_SYMPTOM_CHANGE = "handleSymptomChange";
-  const HANDLE_HOSPITAL_CHANGE = "handleHospitalChange";
-  const HANDLE_RECEIVED_OPD = "handleReceivedOpd";
-
   useEffect(
     () => async () => {
       // Fetch doctors list when the component mounts
@@ -91,87 +81,48 @@ export default function AddPrescriptionForm() {
       await fetchDiagnosisList();
       await fetchDiagnosisSymptomsList();
       await fetchHospitalList();
-
-      const form_data = sessionStorage.getItem(FORM_STORAGE_KEY);
-      const patient_email = sessionStorage.getItem(HANDLE_PATIENT_EMAIL);
-      const doctor_email = sessionStorage.getItem(HANDLE_DOCTOR_EMAIL);
-      const diagnosis = sessionStorage.getItem(HANDLE_DIAGNOSIS_CHANGE);
-      const diagnosisVal = sessionStorage.getItem(HANDLE_DIAGNOSIS_VALUE_CHANGE);
-      const symptom = sessionStorage.getItem(HANDLE_SYMPTOM_CHANGE);
-      const hospital = sessionStorage.getItem(HANDLE_HOSPITAL_CHANGE);
-      const opd = sessionStorage.getItem(HANDLE_RECEIVED_OPD);
-
-      if(opd !== null){
-        setReceivedOpdId(opd);
-      }
-      // console.log("initial---------------------------")
-      // console.log("form_data: ", form_data);
-      // console.log("patient_email: ",patient_email);
-      // console.log("doctor_email: ", doctor_email);
-      // console.log("diagnosis: ", diagnosis);
-      // console.log("diagnosisVal: ", diagnosisVal);
-      // console.log("symptom: ", symptom);
-
-      setFormData((prevData) => ({
-        ...prevData,
-        date: new Date().toISOString().split('T')[0],
-      }))
-
-      if(form_data != null){
-        setFormData(JSON.parse(form_data))
-      }
-      if(patient_email != null){
-        setSelectedPatient(JSON.parse(patient_email))
-      }
-
-      if(doctor_email != null){
-        setSelectedDoctor(JSON.parse(doctor_email))
-      }
-
-      if(diagnosis != null){
-        setSelectedDiagnosis(JSON.parse(diagnosis))
-        setFormData((prevData) => ({
-          ...prevData,
-          diagnosis: diagnosisVal
-        }))
-      }
-
-      if(symptom != null){
-        setFormData((prevData) => ({
-          ...prevData,
-          symptoms: symptom,
-        }))
-      }
-
-      if(hospital != null){
-        setSelectedHospital(JSON.parse(hospital));
-      }
-
-      // console.log("formData: ", formData);
-      // if(savedData){
-      //   setFormData(JSON.parse(savedData)) 
-      //   console.log(JSON.parse(savedData))
-      // }
-
-      const medical_data = sessionStorage.getItem(HANDLE_INPUT_CHANGE_KEY)
-      if(medical_data != null){
-        setDataArray(JSON.parse(medical_data))
-      }
-
-      // const medicine_data = sessionStorage.getItem(HANDLE_SELECTED_MEDICINE)
-      // if(medicine_data){
-      //   // console.log(JSON.parse(medicine_data))
-      //   setDataArray(JSON.parse(medicine_data))
-      // } 
-
-      // formData.date = // default date => today
-
-      // console.log("formData: ", formData);
-      // console.log("formData symptoms: ", formData.symptoms);
+      await fetchPatientVitalsData(); 
       setLoading(false);
     },
     []
   );
+
+  const fetchPatientVitalsData = async () => {
+    try {
+        console.log('fetching patient vitals data: ');
+        console.log(`${apiRoutes.patientVitals}/${id}`);
+        const response = await axios.get(`${apiRoutes.patientVitals}/${id}`, {
+            withCredentials: true,
+        });
+        console.log('response: ');
+        console.log(response.data);
+        const prescriptionData = response.data;
+        setFormData({
+            email: prescriptionData.email,
+            date: prescriptionData.date,
+            temperature: prescriptionData.temperature,
+            bloodPressure: prescriptionData.bloodPressure,
+            pulseRate: prescriptionData.pulseRate,
+            spO2: prescriptionData.spO2,
+        });
+
+        console.log('patient value', prescriptionData.patientId);
+        console.log('patient email', prescriptionData.email);
+        console.log('patient name', prescriptionData.patientName);
+        setSelectedPatient({
+            value: prescriptionData.patientId,
+            label: prescriptionData.email,
+            name: prescriptionData.patientName,
+        });
+    } catch (error) {
+        console.error(
+            `ERROR (fetch-patient-vitals-in-update-patient-vitals): ${error?.response?.data?.message}`
+        );
+        toast.error(
+            error?.response?.data?.message || "Failed to fetch Patient Vitals Data"
+        );
+    }
+  };
 
   const fetchDoctors = async () => {
     try {
@@ -286,8 +237,6 @@ export default function AddPrescriptionForm() {
     setDataArray(updatedArray);
     console.log(updatedArray)
 
-    sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY,JSON.stringify(updatedArray))
-
   };
 
   const handleDoctorChange = (selectedDoctor) => {
@@ -300,14 +249,13 @@ export default function AddPrescriptionForm() {
       ...prevData,
       doctor: doctorVal,
     }));
-    sessionStorage.setItem(HANDLE_DOCTOR_EMAIL,JSON.stringify(selectedDoctor))
   };
 
   const handleDiagnosisChange = (selectedDiagnosis) => {
     console.log("selected diagnosis: ",selectedDiagnosis)
     setSelectedDiagnosis(selectedDiagnosis);
 
-    sessionStorage.setItem(HANDLE_DIAGNOSIS_CHANGE,JSON.stringify(selectedDiagnosis))
+
     var diagnosisVal = "";
     var symptomsVal = "";
 
@@ -329,8 +277,6 @@ export default function AddPrescriptionForm() {
       }
       // symptomsVal = symptomsList.join(", ");
     // }
-    sessionStorage.setItem(HANDLE_DIAGNOSIS_VALUE_CHANGE,diagnosisVal)
-    sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,symptomsVal)
 
     console.log(`diagnosisval: ${diagnosisVal}`);
     console.log(formData.date)
@@ -353,8 +299,6 @@ export default function AddPrescriptionForm() {
       ...prevData,
       referredHospital,
     }))
-
-    sessionStorage.setItem(HANDLE_HOSPITAL_CHANGE, JSON.stringify(selectedHospital));
   } 
 
   const handlePatientChange = (selectedPatient) => {
@@ -369,7 +313,6 @@ export default function AddPrescriptionForm() {
       ...prevData,
       email: patientVal,
     }));
-    sessionStorage.setItem(HANDLE_PATIENT_EMAIL,JSON.stringify(selectedPatient))
   };
   const handleMedicineChange = (selectedMedicine, index) => {
     console.log('handle Medicine Change')
@@ -383,7 +326,6 @@ export default function AddPrescriptionForm() {
       const updatedArray = [...prevData];
       updatedArray[index].name = selectedMedicine;
       console.log(updatedArray);
-      sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY,JSON.stringify(updatedArray))
       return updatedArray;
     });
   };
@@ -406,7 +348,6 @@ export default function AddPrescriptionForm() {
     //   [name]: value,
     // }));
     setFormData(updatedData);
-    sessionStorage.setItem(FORM_STORAGE_KEY,JSON.stringify(updatedData))
 
   };
 
@@ -414,7 +355,7 @@ export default function AddPrescriptionForm() {
     console.log('handle save')
     e.preventDefault();
     const checkupListEntry = {
-      id: receivedOpdId,
+      id,
       patientId: selectedPatient?.value,
       date: formData.date,
     };
@@ -441,13 +382,14 @@ export default function AddPrescriptionForm() {
       const response = await axios.post(apiRoutes.patientVitals + "/save", checkupListEntry, {
         withCredentials: true,
       });
-      setReceivedOpdId(response?.data?.vitals?.id);
-      sessionStorage.setItem(HANDLE_RECEIVED_OPD, receivedOpdId);
-      console.log("Save successful:", response.data.vitals.id);
+      console.log("Save successful:", response.data);
       toast.success(response.data.message);
+      setTimeout(() => {
+        navigate("/patient_vitals");
+      }, 1000);
     } catch(error) {
       console.error("Error saving vitals:", error.response?.data || error.message);
-      toast.error(`Error: ${error.response?.data?.message || "Something went wrong"}`);
+      toast.error(`Error: ${error.response?.data.message || "Something went wrong"}`);
     }
 
   }
@@ -458,8 +400,7 @@ export default function AddPrescriptionForm() {
     // Here you can handle the submission of the form
     console.log(formData.diagnosis)
     const checkupListEntry = {
-      id: receivedOpdId,
-      patientId: selectedPatient?.value,
+      patientId: selectedPatient?.value?.id,
       date: formData.date,
       diagnosis: formData.diagnosis,
     };
@@ -510,20 +451,9 @@ export default function AddPrescriptionForm() {
       const response = await axios.post(apiRoutes.checkup, data, {
         withCredentials: true,
       });
-      setReceivedOpdId("");
       console.log(response.data);
       toast.success(response.data.message);
 
-      sessionStorage.removeItem(FORM_STORAGE_KEY) 
-      sessionStorage.removeItem(HANDLE_INPUT_CHANGE_KEY) 
-      sessionStorage.removeItem(HANDLE_SELECTED_MEDICINE) 
-      sessionStorage.removeItem(HANDLE_PATIENT_EMAIL) 
-      sessionStorage.removeItem(HANDLE_DOCTOR_EMAIL) 
-      sessionStorage.removeItem(HANDLE_DIAGNOSIS_CHANGE)
-      sessionStorage.removeItem(HANDLE_DIAGNOSIS_VALUE_CHANGE)
-      sessionStorage.removeItem(HANDLE_SYMPTOM_CHANGE)
-      sessionStorage.removeItem(HANDLE_HOSPITAL_CHANGE)
-      sessionStorage.removeItem(HANDLE_RECEIVED_OPD)
       setTimeout(() => {
         navigate("/prescription");
       }, 1000);
@@ -593,17 +523,19 @@ export default function AddPrescriptionForm() {
                     size="md"
                     onClick={handleSave}
                   >
-                    Save Vitals                   </Button>
+                    vitals save
+                  </Button>
 
                   <Button
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
-                      navigate("/patient_vitals")
+                    navigate("/patient_vitals")
                     }}
                   >
                     Patient Vitals List
                   </Button>
+
                 </div>
               </div>
             </CardHeader>
@@ -806,7 +738,6 @@ export default function AddPrescriptionForm() {
                       className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
                       value={formData.symptoms}
                       onChange={(e) =>{
-                        sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,e.target.value)
                         handleChange(e.target.name, e.target.value)
                       }}
                     />

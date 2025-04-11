@@ -144,6 +144,7 @@ const checkupMedicinesSchema = Joi.object({
 
 // Checkup Schema
 const checkupSchema = Joi.object({
+  id: Joi.string().required(),
   patientId: Joi.string().required(),
   staffEmail: Joi.string().email().required(),
   temperature: Joi.number().allow(null).allow('').optional(),

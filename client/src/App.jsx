@@ -48,6 +48,8 @@ import UpdateMedicine from "./pages/UpdateMedicine";
 import UpdatePurchase from "./pages/UpdatePurchase";
 import UpdatePrescription from "./pages/UpdatePrescription";
 import PatientVitalsList from "./pages/PatientVitalsList";
+import PatientVitalsDetail from "./pages/PatientVitalsDetail"
+import UpdatePatientVitals from "./pages/UpdatePatientVitals";
 
 function App() {
   const { userRole } = useAuthContext();
@@ -213,6 +215,11 @@ function App() {
               <PrescriptionDetail />
             </ProtectedRoute>
           } />
+          <Route path="/patient_vitals/:id" element={
+            <ProtectedRoute routeName="PATIENT_VITALS_DETAIL">
+              <PatientVitalsDetail />
+            </ProtectedRoute>
+          } />
           <Route path="/schedule/doctor" element={
             <ProtectedRoute routeName="DOCTOR_SCHEDULE">
               <DoctorScheduleList />
@@ -305,6 +312,11 @@ function App() {
           <Route path="/prescription/update/:id" element={
             <ProtectedRoute routeName="ADD_PRESCRIPTION">
               <UpdatePrescription />
+            </ProtectedRoute>
+          } />
+          <Route path="/patient_vitals/update/:id" element={
+            <ProtectedRoute routeName="ADD_PATIENT_VITALS">
+              <UpdatePatientVitals />
             </ProtectedRoute>
           } />
         </Routes>

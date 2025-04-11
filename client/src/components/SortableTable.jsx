@@ -40,6 +40,7 @@ import Pagination from "./Pagination";
 import { useNavigate } from "react-router-dom";
 
 import DialogBox from "./DialogBox";
+import PatientVitalsDialogBox from "./PatientVitalsDialogBox";
 
 export function SortableTable({
   tableHead,
@@ -49,6 +50,7 @@ export function SortableTable({
   text,
   addLink,
   handleDelete,
+  justDeleteRecord,
   searchKey,
   handleApprove,
   handleReject,
@@ -59,6 +61,8 @@ export function SortableTable({
   handleUpdate = () => {},
   defaultSortOrder = "action",
 }) {
+
+
   const [open, setOpen] = useState(false);
   const [deletedRecordId, setDeletedRecordId] = useState(null);
 
@@ -450,14 +454,15 @@ export function SortableTable({
                                 <Tooltip content="View">
                                   <IconButton
                                     variant="text"
-                                    onClick={(e) =>
-                                    handleDetail(
-                                      e,
-                                      rowData["id"],
-                                      (currentPage - 1) * itemsPerPage +
-                                        index +
-                                        1
-                                    )
+                                    onClick={(e) => {
+                                      return handleDetail(
+                                        e,
+                                        rowData["id"],
+                                        (currentPage - 1) * itemsPerPage +
+                                          index +
+                                          1
+                                      )
+                                    }
                                   }
                                   >
                                     <EyeIcon className="h-4 w-4" />
@@ -549,14 +554,25 @@ export function SortableTable({
           </div>
         </div>
       </CardFooter>
-      <DialogBox
-        title={title.split(" ")[0]}
-        open={open}
-        setOpen={setOpen}
-        handleDelete={handleDelete}
-        deletedRecordId={deletedRecordId}
-        setDeletedRecordId={setDeletedRecordId}
-      />
+
+      {justDeleteRecord ? 
+        <PatientVitalsDialogBox
+          title={title.split(" ")[0]}
+          open={open}
+          setOpen={setOpen}
+          handleDelete={handleDelete}
+          deletedRecordId={deletedRecordId}
+          setDeletedRecordId={setDeletedRecordId}
+        /> : 
+        <DialogBox
+          title={title.split(" ")[0]}
+          open={open}
+          setOpen={setOpen}
+          handleDelete={handleDelete}
+          deletedRecordId={deletedRecordId}
+          setDeletedRecordId={setDeletedRecordId}
+        /> 
+      }
     </Card>
   );
 }

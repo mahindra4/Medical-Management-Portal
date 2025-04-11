@@ -221,9 +221,22 @@ const savePatientVitals = async (req, res) => {
 
         let vitals = null;
         const timeInfo = 'T' + DateTime.now().setZone('Asia/Kolkata').toISOTime({ suppressMilliseconds: true });
-
-
-        if(id == null){
+        console.log("id: ",id);
+        if(id){
+            vitals = await prisma.patientVitals.update({
+                where: {id},
+                data: { id,
+                        patientId,
+                        temperature: parseFloat(temperature),
+                        date: date + timeInfo, 
+                        bloodPressure, 
+                        pulseRate: parseInt(pulseRate),
+                        spO2: parseFloat(spO2),
+                    }
+            });
+            res.status(201).json({ message: "Patient vitals updated successfully", vitals, id});
+        }
+        else{
             vitals = await prisma.patientVitals.create({
                 data: { id: opdId,
                         patientId,
@@ -234,20 +247,7 @@ const savePatientVitals = async (req, res) => {
                         spO2: parseFloat(spO2),
                     }
             });
-            res.status(201).json({ message: "Patient vitals saved successfully", vitals });
-        }
-        else{
-            vitals = await prisma.patientVitals.update({
-                where: {id},
-                data: { patientId,
-                        temperature: parseFloat(temperature),
-                        date: date + timeInfo, 
-                        bloodPressure, 
-                        pulseRate: parseInt(pulseRate),
-                        spO2: parseFloat(spO2),
-                    }
-            });
-            res.status(201).json({ message: "Patient vitals updated successfully", vitals });
+            res.status(201).json({ message: "Patient vitals saved successfully", vitals , id });
         }
     } catch (error) {
         console.error("Error saving patient vitals:", error);

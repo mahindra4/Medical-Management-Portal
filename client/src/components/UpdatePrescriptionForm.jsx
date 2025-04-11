@@ -197,6 +197,7 @@ export default function UpdatePrescriptionForm() {
     }));
   };
   const handlePatientChange = (selectedPatient) => {
+    console.log('handle patient change')
     console.log(selectedPatient);
     setSelectedPatient(selectedPatient);
     setFormData((prevData) => ({
