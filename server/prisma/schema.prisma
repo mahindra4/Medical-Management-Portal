@@ -231,6 +231,12 @@ model Hospitals {
   @@map("hospitals")
 }
 
+model OpdCounter {
+  id    String @id
+  date  String
+  count Int
+}
+
 enum Status {
   ACTIVE
   INACTIVE
