@@ -52,22 +52,22 @@ const getAllObservations = async (req, res, next) => {
       
       return {
         id: obs.id,
-        patientName: obs.checkup?.Patient?.name || 'N/A',
-        doctorName: obs.checkup?.Doctor?.name || 'N/A',
-        staffName: obs.checkup?.Staff?.name || 'N/A',
-        date: obs.checkup?.date?.toISOString().split('T')[0] || 'N/A',
-        temperature: obs.checkup?.temperature ?? 'N/A',
-        bloodPressure: obs.checkup?.bloodPressure || 'N/A',
-        pulseRate: obs.checkup?.pulseRate ?? 'N/A',
-        spO2: obs.checkup?.spO2 ?? 'N/A',
-        diagnosis: obs.checkup?.diagnosis || 'N/A',
-        symptoms: obs.checkup?.symptoms || 'N/A',
+        patientName: obs.checkup?.Patient?.name || '',
+        doctorName: obs.checkup?.Doctor?.name || '',
+        staffName: obs.checkup?.Staff?.name || '',
+        date: obs.checkup?.date?.toISOString().split('T')[0] || '',
+        temperature: obs.checkup?.temperature ?? '',
+        bloodPressure: obs.checkup?.bloodPressure || '',
+        pulseRate: obs.checkup?.pulseRate ?? '',
+        spO2: obs.checkup?.spO2 ?? '',
+        diagnosis: obs.checkup?.diagnosis || '',
+        symptoms: obs.checkup?.symptoms || '',
         medicineDetails: obs.observation?.medicine?.brandName 
           ? `${obs.observation.medicine.brandName} (${obs.observation.dosage}/${obs.observation.frequency})`
-          : 'N/A',
+          : '',
         totalQuantity: obs.observation 
           ? (obs.observation.dailyQuantity || 0) * (obs.observation.days || 0)
-          : 'N/A',
+          : '',
         status: obs.isUnderObservation ? "Active" : "Inactive"
       };
     });
@@ -89,47 +89,27 @@ const getAllObservations = async (req, res, next) => {
 // @desc    Get single observation
 // route    GET /api/observations/:id
 // @access  Private (Admin, Doctor, Paramedical)
+// In your observationController.js
 const getObservation = async (req, res, next) => {
   try {
-    // Extract and validate ID
-    let observationId = req.params.id;
-    
-    // Handle case where ID might be in format "id^index"
-    if (typeof observationId === 'string' && observationId.includes('^')) {
-      observationId = observationId.split('^')[0];
-    }
-    
-    // Handle case where ID might be an object (from malformed requests)
-    if (typeof observationId === 'object') {
-      if (observationId.id) {
-        observationId = observationId.id;
-      } else {
-        throw new ExpressError("Invalid observation ID format - received object without id property", 400);
-      }
-    }
-
-    // Validate UUID format
-    if (typeof observationId !== 'string' || !observationId.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)) {
-      throw new ExpressError(`Invalid observation ID format: ${observationId}`, 400);
-    }
-
     const observation = await prisma.patientUnderObs.findUnique({
-      where: { id: observationId },
+      where: { id: req.params.id },
       include: {
         checkup: {
           include: {
             Patient: true,
             Doctor: true,
-            Staff: true
+            Staff: true,
+            CheckupMedicine: {
+              include: {
+                Medicine: true
+              }
+            }
           }
         },
         observation: {
           include: {
-            medicine: {
-              select: {
-                brandName: true
-              }
-            }
+            medicine: true
           }
         }
       }
@@ -139,50 +119,54 @@ const getObservation = async (req, res, next) => {
       throw new ExpressError("Observation not found", 404);
     }
 
-    // Format response similar to checkupController
+    // Format response with ALL needed fields
     const responseData = {
+      // Basic info
       id: observation.id,
-      patientId: observation.checkup.Patient.id,
+      date: observation.checkup.date,
+      status: observation.isUnderObservation ? "Active" : "Inactive",
+      
+      // People
       patientName: observation.checkup.Patient.name,
-      doctorName: observation.checkup.Doctor?.name || 'N/A',
+      doctorName: observation.checkup.Doctor?.name,
       staffName: observation.checkup.Staff.name,
-      date: observation.checkup.date.toISOString().split('T')[0],
-      temperature: observation.checkup.temperature || 'N/A',
-      bloodPressure: observation.checkup.bloodPressure || 'N/A',
-      pulseRate: observation.checkup.pulseRate || 'N/A',
-      spO2: observation.checkup.spO2 || 'N/A',
-      diagnosis: observation.checkup.diagnosis || 'N/A',
-      symptoms: observation.checkup.symptoms || 'N/A',
-      medicineDetails: {
-        medicine: observation.observation.medicine?.brandName || 'N/A',
-        dosage: observation.observation.dosage || 'N/A',
-        frequency: observation.observation.frequency || 'N/A',
-        dailyQuantity: observation.observation.dailyQuantity || 0,
-        days: observation.observation.days || 0,
-        totalQuantity: observation.observation.dailyQuantity * observation.observation.days || 0,
-        availableQuantity: observation.observation.availableQuantity || 0
-      },
-      isActive: observation.isUnderObservation,
-      checkupId: observation.checkupId,
-      observationId: observation.observationId
+      
+      // Vitals
+      bloodPressure: observation.checkup.bloodPressure,
+      spO2: observation.checkup.spO2,
+      pulseRate: observation.checkup.pulseRate,
+      temperature: observation.checkup.temperature,
+      
+      // Medical info
+      diagnosis: observation.checkup.diagnosis,
+      symptoms: observation.checkup.symptoms,
+      referredDoctor: observation.checkup.referredDoctor,
+      referredHospital: observation.checkup.referredHospital,
+      
+      // Medicines
+      medicines: observation.checkup.CheckupMedicine.map(med => ({
+        brandName: med.Medicine.brandName,
+        dosage: med.dosage,
+        frequency: med.frequency,
+        days: med.days,
+        dailyQuantity: med.dailyQuantity
+      })),
+      
+      // Observation-specific meds
+      observationMedicines: observation.observation ? [{
+        brandName: observation.observation.medicine?.brandName,
+        dosage: observation.observation.dosage,
+        frequency: observation.observation.frequency,
+        days: observation.observation.days,
+        dailyQuantity: observation.observation.dailyQuantity
+      }] : []
     };
 
-    res.status(200).json({
-      ok: true,
-      data: responseData,
-      message: "Observation retrieved successfully"
-    });
-
+    res.status(200).json(responseData);
   } catch (error) {
-    console.error("Error fetching observation:", {
-      error: error.message,
-      params: req.params
-    });
     next(error);
   }
 };
-
-
 // @desc    Update observation
 // route    PUT /api/observations/:id
 // @access  Private (Admin, Doctor)
@@ -258,49 +242,107 @@ const updateObservation = async (req, res, next) => {
 // @access  Private (Admin)
 const deleteObservation = async (req, res, next) => {
   try {
-    // 1. Get observation first
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({
+        ok: false,
+        message: "Observation ID is required"
+      });
+    }
+
+    // First check if the observation exists with all related data
     const observation = await prisma.patientUnderObs.findUnique({
-      where: { id: req.params.id },
-      include: { 
+      where: { id },
+      include: {
         observation: true,
         checkup: true
       }
     });
 
     if (!observation) {
-      throw new ExpressError("Observation not found", 404);
+      return res.status(404).json({
+        ok: false,
+        message: "Observation not found"
+      });
     }
 
-    // 2. Delete in transaction
-    await prisma.$transaction([
-      ...(observation.observation.medicineId ? [
-        prisma.stock.update({
-          where: { medicineId: observation.observation.medicineId },
-          data: {
-            outQuantity: { decrement: observation.observation.dailyQuantity * observation.observation.days },
-            stock: { increment: observation.observation.dailyQuantity * observation.observation.days }
-          }
-        })
-      ] : []),
-      prisma.observationDetails.delete({
-        where: { id: observation.observationId }
-      }),
-      prisma.checkup.update({
-        where: { id: observation.checkupId },
-        data: {
-          PatientUnderObs: {
-            delete: true
-          }
-        }
-      })
-    ]);
+    // Process everything in a transaction
+    const result = await prisma.$transaction(async (prisma) => {
+      // 1. Return stock if observation has medicine
+      if (observation.observation?.medicineId) {
+        const totalQuantity = observation.observation.dailyQuantity * observation.observation.days;
+        
+        // First find the stock record for this medicine
+        const stock = await prisma.stock.findFirst({
+          where: { medicineId: observation.observation.medicineId }
+        });
 
-    res.status(200).json({
-      ok: true,
-      message: "Observation deleted successfully"
+        if (!stock) {
+          console.error(`Stock record not found for medicineId: ${observation.observation.medicineId}`);
+          throw new ExpressError("Stock record not found for this medicine", 404);
+        }
+
+        // Verify we have enough outQuantity to decrement
+        if (stock.outQuantity < totalQuantity) {
+          console.error(`Insufficient outQuantity in stock. Current: ${stock.outQuantity}, Trying to decrement: ${totalQuantity}`);
+          throw new ExpressError("Insufficient outQuantity in stock to reverse this observation", 400);
+        }
+
+        // Now update using the stock's id
+        await prisma.stock.update({
+          where: { id: stock.id },
+          data: {
+            outQuantity: { decrement: totalQuantity },
+            stock: { increment: totalQuantity }
+          }
+        });
+      }
+
+      // 2. First delete the patient under observation record (which references observationDetails)
+      await prisma.patientUnderObs.delete({
+        where: { id: observation.id }
+      });
+
+      // 3. Then delete the observation details (now that nothing references it)
+      if (observation.observationId) {
+        await prisma.observationDetails.delete({
+          where: { id: observation.observationId }
+        });
+      }
+
+      return { success: true };
     });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Observation deleted successfully",
+    });
+
   } catch (error) {
-    next(error);
+    console.error("Delete observation error:", error);
+    
+    if (error.code === 'P2003') {
+      return res.status(400).json({
+        ok: false,
+        message: "Cannot delete due to existing references. Please delete referencing records first.",
+        error: error.message
+      });
+    }
+    
+    if (error.code === 'P2025') {
+      return res.status(404).json({
+        ok: false,
+        message: "Record not found",
+        error: error.message
+      });
+    }
+    
+    return res.status(500).json({
+      ok: false,
+      message: "Failed to delete observation",
+      error: error.message
+    });
   }
 };
 

@@ -13,28 +13,28 @@ const profileMiddleware = require("../middlewares/profileMiddleware");
 const roleMap = require("../utils/roleMap");
 
 // Observation routes
-router.get('/', 
-  authMiddleware(roleMap("GET_OBSERVATION")), 
-  profileMiddleware(true), 
-  catchAsync(getAllObservations)
-);
+router.route('/')
+  .get(
+    authMiddleware(roleMap("GET_OBSERVATION")),
+    profileMiddleware(true),
+    catchAsync(getAllObservations)
+  );
 
-router.get('/:id', 
-  authMiddleware(roleMap("GET_OBSERVATION")), 
-  profileMiddleware(true), 
-  catchAsync(getObservation)
-);
-
-router.put('/:id', 
-  authMiddleware(roleMap("UPDATE_OBSERVATION")), 
-  profileMiddleware(true), 
-  catchAsync(updateObservation)
-);
-
-router.delete('/:id', 
-  authMiddleware(roleMap("DELETE_OBSERVATION")), 
-  profileMiddleware(true), 
-  catchAsync(deleteObservation)
-);
+router.route('/:id')
+  .get(
+    authMiddleware(roleMap("GET_OBSERVATION")),
+    profileMiddleware(true),
+    catchAsync(getObservation)
+  )
+  .put(
+    authMiddleware(roleMap("UPDATE_OBSERVATION")),
+    profileMiddleware(true),
+    catchAsync(updateObservation)
+  )
+  .delete(
+    authMiddleware(roleMap("DELETE_OBSERVATION")),
+    profileMiddleware(true),
+    catchAsync(deleteObservation)
+  );
 
 module.exports = router;

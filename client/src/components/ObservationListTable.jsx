@@ -40,6 +40,8 @@ export default function ObservationListTable() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [observations, setObservations] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
+ // const deleteDisabled = (row) => row.status === "Active";
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,40 +60,55 @@ export default function ObservationListTable() {
   }, []);
 
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this observation?');
+    if (!confirmDelete) return;
+  
     try {
+      setLoading(true); // Add loading state during deletion
       const response = await axios.delete(`${apiRoutes.observation}/${id}`, {
         withCredentials: true
       });
       
       if (response.data.ok) {
-        toast.success(response.data.message);
+        toast.success('Observation deleted successfully');
         setObservations(prev => prev.filter(obs => obs.id !== id));
+      } else {
+        toast.error(response.data.message || 'Failed to delete observation');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete observation');
+      console.error('Delete error:', error);
+      // Show more detailed error message if available
+      toast.error(error.response?.data?.error || 
+                 error.response?.data?.message || 
+                 'Failed to delete observation');
+    } finally {
+      setLoading(false); // Ensure loading is turned off
     }
   };
-
-  const handleViewDetails = (rowData, index) => {
-    // Extract the ID properly from the row data
-    const observationId = rowData?.id || rowData?.originalId;
-    if (!observationId) {
-      console.error('No observation ID found in row:', rowData);
-      toast.error('Could not determine observation ID');
-      return;
+ // if (loading) return <SyncLoadingScreen />;
+  
+ const handleViewDetails = (rowData) => {
+    try {
+      if (!rowData?.id) {
+        throw new Error('Observation data is missing ID');
+      }
+      navigate(`/observation/view/${rowData.id}`);
+    } catch (error) {
+      console.error('Error in handleViewDetails:', error);
+      toast.error('Failed to view observation details');
     }
-    navigate(`/observation/${observationId}^${index}`);
   };
 
   const handleEdit = (rowData) => {
-    // Extract the ID properly from the row data
-    const observationId = rowData?.id || rowData?.originalId;
-    if (!observationId) {
-      console.error('No observation ID found in row:', rowData);
-      toast.error('Could not determine observation ID');
-      return;
+    try {
+      if (!rowData?.id) {
+        throw new Error('Observation data is missing ID');
+      }
+      navigate(`/observation/edit/${rowData.id}`);
+    } catch (error) {
+      console.error('Error in handleEdit:', error);
+      toast.error('Failed to edit observation');
     }
-    navigate(`/observation/update/${observationId}`);
   };
 
   if (loading) return <SyncLoadingScreen />;
@@ -111,12 +128,7 @@ export default function ObservationListTable() {
         detailsFlag={true}
         handleUpdate={handleEdit}
         defaultSortOrder="date"
-        deleteDisabled={(row) => row.status === "Active"}
-        deleteTooltip={(row) => 
-          row.status === "Active" 
-            ? "Active observations cannot be deleted" 
-            : "Delete this observation record"
-        }
+       
       />
     </Layout>
   );

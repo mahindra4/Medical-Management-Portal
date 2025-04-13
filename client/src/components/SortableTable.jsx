@@ -57,6 +57,7 @@ export function SortableTable({
   actionFlag = "true",
   showAddBtn = true,
   handleUpdate = () => {},
+  deleteDisabled = () => false,
   defaultSortOrder = "action",
 }) {
   const [open, setOpen] = useState(false);
@@ -447,23 +448,16 @@ export function SortableTable({
                         {title !== "Pending Request List" ? (
                           <>
                             {detailsFlag == true && (
-                                <Tooltip content="View">
-                                  <IconButton
-                                    variant="text"
-                                    onClick={(e) =>
-                                    handleDetail(
-                                      e,
-                                      rowData["id"],
-                                      (currentPage - 1) * itemsPerPage +
-                                        index +
-                                        1
-                                    )
-                                  }
-                                  >
-                                    <EyeIcon className="h-4 w-4" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
+                              <Tooltip content="View">
+                                <IconButton
+                                  variant="text"
+                                  onClick={() => handleDetail(rowData)}  // Pass the entire rowData directly
+                                >
+                                  <EyeIcon className="h-4 w-4" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                                  
                             {title !== "Medical History List" && (
                               <>
                                   <Tooltip content="Edit">
@@ -477,15 +471,16 @@ export function SortableTable({
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip content="Delete">
-                                  <IconButton
-                                    variant="text"
-                                    onClick={(e) => {
-                                        console.log("rowData: ", rowData);
-                                        handleDialogDelete(e, rowData["id"]);
-                                      }}
-                                  >
-                                    <TrashIcon className="h-4 w-4" />
-                                  </IconButton>
+                               
+                                <IconButton
+  variant="text"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleDelete(rowData.id); // Use handleDelete directly
+  }}
+>
+  <TrashIcon className="h-4 w-4" />
+</IconButton>
                                 </Tooltip>
                               </>
                             )}

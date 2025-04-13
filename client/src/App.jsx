@@ -67,7 +67,7 @@ function App() {
               <ObservationList />
             </ProtectedRoute>
           } />
-          <Route path="/observation/:id" element={
+          <Route path="/observation/view/:id" element={
             <ProtectedRoute routeName="OBSERVATION_DETAIL">
               <ObservationDetail />
             </ProtectedRoute>
