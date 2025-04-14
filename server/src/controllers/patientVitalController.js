@@ -234,6 +234,18 @@ const savePatientVitals = async (req, res) => {
                         spO2: parseFloat(spO2),
                     }
             });
+            await prisma.checkup.update({
+                where: {id},
+                data:{
+                    id,
+                    patientId,
+                    temperature: parseFloat(temperature),
+                    date: date + timeInfo, 
+                    bloodPressure, 
+                    pulseRate: parseInt(pulseRate),
+                    spO2: parseFloat(spO2),
+                }
+            })
             res.status(201).json({ message: "Patient vitals updated successfully", vitals, id});
         }
         else{

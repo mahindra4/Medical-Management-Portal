@@ -508,7 +508,7 @@ export default function UpdatePatientVitalsForm() {
                   </Typography>
                 </div>
                 <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                  <Button
+                  {/* <Button
                     className="flex items-center gap-3"
                     size="md"
                     onClick={() => {
@@ -516,7 +516,7 @@ export default function UpdatePatientVitalsForm() {
                     }}
                   >
                     Prescription List
-                  </Button>
+                  </Button> */}
 
                   <Button
                     className="flex items-center gap-3"
@@ -645,7 +645,7 @@ export default function UpdatePatientVitalsForm() {
                       }
                     />
                   </div>
-                  <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
+                  {/* <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">
                         Date<span className="text-red-800">*</span>:
@@ -669,8 +669,11 @@ export default function UpdatePatientVitalsForm() {
                         handleChange(e.target.name, value)
                       }}
                     />
+                  </div> */}
+                  <div>
+                    <br />
                   </div>
-                  <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
+                  {/* <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="doctor">Doctor:</label>
                     </div>
@@ -687,9 +690,9 @@ export default function UpdatePatientVitalsForm() {
                       onChange={handleDoctorChange}
                       isClearable={true}
                     />
-                  </div>
+                  </div> */}
 
-                  <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
+                  {/* <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">
                         Diagnosis<span className="text-red-800">*</span>:
@@ -711,21 +714,9 @@ export default function UpdatePatientVitalsForm() {
                       onChange={handleDiagnosisChange}
                       isClearable={true}
                     />
-                    {/* <Textarea
-                      id="diagnosis"
-                      size="md"
-                      label="Diagnosis"
-                      name="diagnosis"
-                      type="text"
-                      className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
-                      value={formData.diagnosis}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
-                    /> */}
-                  </div>
+                  </div> */}
 
-                  <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
+                  {/* <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">Symptoms:</label>
                     </div>
@@ -741,8 +732,8 @@ export default function UpdatePatientVitalsForm() {
                         handleChange(e.target.name, e.target.value)
                       }}
                     />
-                  </div>
-                  <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
+                  </div> */}
+                  {/* <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">Referred Doctor:</label>
                     </div>
@@ -758,24 +749,11 @@ export default function UpdatePatientVitalsForm() {
                         handleChange(e.target.name, e.target.value)
                       }
                     />
-                  </div>
-                  <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
+                  </div> */}
+                  {/* <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">Referred Hospital:</label>
                     </div>
-                    {/* <Textarea
-                      id="referredHospital"
-                      size="md" 
-                      label="Referred Hospital"
-                      name="referredHospital"
-                      type="text"
-                      className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
-                      value={formData.referredHospital}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
-                    /> */}
-
                     <Select
                       id="referredHospital"
                       options={
@@ -791,10 +769,10 @@ export default function UpdatePatientVitalsForm() {
                       onChange={handleHospitalChange}
                       isClearable={true}
                     />
-                  </div>
+                  </div> */}
                 </div>
 
-                <div className="w-full ">
+                {/* <div className="w-full ">
                   <table className="w-full min-w-max table-auto text-left">
                     <thead>
                       <tr>
@@ -905,10 +883,10 @@ export default function UpdatePatientVitalsForm() {
                       </tr>
                     </tbody>
                   </table>
-                </div>
+                </div> */}
               </form>
-            </CardBody>
-            <CardFooter divider={true}>
+          </CardBody>
+            {/* <CardFooter divider={true}>
               <div className="flex justify-end">
                 <Button
                   className="flex items-center gap-3"
@@ -918,7 +896,7 @@ export default function UpdatePatientVitalsForm() {
                   Submit
                 </Button>
               </div>
-            </CardFooter>
+            </CardFooter> */}
           </Card>
         </Layout>
       )}
