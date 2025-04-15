@@ -231,6 +231,19 @@ model Hospitals {
   @@map("hospitals")
 }
 
+model Procedure {
+  id                      String    @unique
+  patientEmail            String
+  patientName             String
+  inTime                  DateTime
+  procedureRecord         String
+  patientConditionBefore  String
+  referredHospital        String
+  outTime                 DateTime?
+
+  @@map("procedures")
+}
+
 model OpdCounter {
   id    String @id
   date  String
