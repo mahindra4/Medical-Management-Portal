@@ -108,6 +108,13 @@ const roleMapping = new Map([
     ["CREATE_PATIENT_VITALS", ["D","PM"]],
     ["PATIENT_VITAL_LIST", ["D","PM"]],
     ["DELETE_PATIENT_VITALS", ["D", "PM"]],
+
+    //procedure routes
+    ["GET_PROCEDURE_LIST", ["D","PM"]],
+    ["GET_PROCEDURE", ["D","PM"]],
+    ["CREATE_PROCEDURE", ["D","PM"]],
+    ["UPDATE_PROCEDURE", ["D","PM"]],
+    ["DELETE_PROCEDURE", ["D","PM"]],
 ]);
 
 const numToRoleMapping = new Map([
