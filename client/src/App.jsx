@@ -51,6 +51,8 @@ import PatientVitalsList from "./pages/PatientVitalsList";
 import PatientVitalsDetail from "./pages/PatientVitalsDetail"
 import UpdatePatientVitals from "./pages/UpdatePatientVitals";
 import Procedure from "./pages/procedure";
+import UpdateProcedureComponent from "./pages/UpdateProcedure";
+import ProcedureDetail from "./pages/ProcedureDetail";
 
 function App() {
   const { userRole } = useAuthContext();
@@ -280,6 +282,11 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
+          <Route path ="procedure/update/:id" element={
+            <ProtectedRoute routeName="ADDPROCEDURE">
+              <UpdateProcedureComponent />
+            </ProtectedRoute>
+          } />
 
           <Route path="/medicine/category/update/:id" element={
             <ProtectedRoute routeName="ADD_CATEGORY">
@@ -324,6 +331,11 @@ function App() {
           <Route path="/patient_vitals/update/:id" element={
             <ProtectedRoute routeName="ADD_PATIENT_VITALS">
               <UpdatePatientVitals />
+            </ProtectedRoute>
+          } />
+           <Route path="/procedure/:id" element={
+            <ProtectedRoute routeName="ADDPROCEDURE">
+              <ProcedureDetail />
             </ProtectedRoute>
           } />
         </Routes>
