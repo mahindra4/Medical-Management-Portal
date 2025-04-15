@@ -23,6 +23,7 @@ export const apiRoutes = {
   diagnosis: `${baseUrl}/diagnosis`,
   hospitals: `${baseUrl}/hospitals`,
   patientVitals: `${baseUrl}/patient_vitals`,
+  Procedure: `${baseUrl}/procedure`,
 };
 
 // console.log(apiRoutes)
