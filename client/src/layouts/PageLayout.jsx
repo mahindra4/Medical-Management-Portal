@@ -4,6 +4,7 @@ import {
   UserCircleIcon,
   ClipboardDocumentListIcon,
   DocumentTextIcon,
+  AdjustmentsHorizontalIcon ,
 } from "@heroicons/react/24/solid";
 import { GiMedicines } from "react-icons/gi";
 import { FaUserDoctor } from "react-icons/fa6";
@@ -638,6 +639,62 @@ const Layout = ({ children }) => {
                             onClick={() => navigate("/patient")}
                           >
                             Patient List
+                          </ListItem>}
+                        </List>
+                      </AccordionBody>
+                    )}
+                  </Accordion>
+                )}
+                {hasRequiredRole(roleArr, ["ADDPROCEDURE", "PROCEDURELIST"]) && (
+                  <Accordion
+                    open={open === 10}
+                    icon={
+                      !(isCollapsed & !isHovered) && (
+                        <ChevronDownIcon
+                          style={{ color: "#f1ffea" }}
+                          strokeWidth={2.5}
+                          className={`mx-auto h-4 w-4 transition-transform ${
+                            open === 10 ? "rotate-180" : ""
+                          }`}
+                        />
+                      )
+                    }
+                  >
+                    <ListItem className="p-0" selected={open === 10}>
+                      <AccordionHeader
+                        onClick={() => handleOpen(10)}
+                        className="border-b-0 p-3"
+                      >
+                        <ListItemPrefix>
+                          <AdjustmentsHorizontalIcon
+                            className="h-5 w-5"
+                            style={{ color: "#f1ffea" }}
+                          />
+                        </ListItemPrefix>
+                        {!(isCollapsed & !isHovered) && (
+                          <Typography
+                            style={{ color: "#f1ffea" }}
+                            className="mr-auto font-normal"
+                          >
+                            Procedure
+                          </Typography>
+                        )}
+                      </AccordionHeader>
+                    </ListItem>
+                    {!(isCollapsed & !isHovered) && (
+                      <AccordionBody className="py-1">
+                        <List className="p-0" style={{ color: "#f1ffea" }}>
+                        {hasRequiredRole(roleArr, ["ADDPROCEDURE"]) && <ListItem
+                            className="ml-9"
+                            onClick={() => navigate("/procedure/add")}
+                          >
+                            Add Procedure
+                          </ListItem>}
+                          {hasRequiredRole(roleArr, ["PROCEDURELIST"]) && <ListItem
+                            className="ml-9"
+                            onClick={() => navigate("/procedure")}
+                          >
+                            Procedure List
                           </ListItem>}
                         </List>
                       </AccordionBody>
