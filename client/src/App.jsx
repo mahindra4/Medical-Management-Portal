@@ -50,6 +50,7 @@ import UpdatePrescription from "./pages/UpdatePrescription";
 import PatientVitalsList from "./pages/PatientVitalsList";
 import PatientVitalsDetail from "./pages/PatientVitalsDetail"
 import UpdatePatientVitals from "./pages/UpdatePatientVitals";
+import AddProcedure from "./pages/AddProcedure";
 import Procedure from "./pages/procedure";
 import UpdateProcedureComponent from "./pages/UpdateProcedure";
 import ProcedureDetail from "./pages/ProcedureDetail";
@@ -128,6 +129,11 @@ function App() {
           <Route path="/medicine/category/add" element={
             <ProtectedRoute routeName="ADD_CATEGORY">
               <AddCategory />
+            </ProtectedRoute>
+          } />
+           <Route path="/procedure/add" element={
+            <ProtectedRoute routeName="ADDPROCEDURE">
+              <AddProcedure />
             </ProtectedRoute>
           } />
           <Route path="/medicine/category" element={
