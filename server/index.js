@@ -30,6 +30,7 @@ const ExpressError = require("./src/utils/ExpressError.js");
 const diagnosisRoutes = require("./src/routes/diagnosisRoutes.js");
 const hospitalRoutes = require("./src/routes/hospitalRoutes.js");
 const patientVitalRoutes = require("./src/routes/patientVitalRoutes.js");
+const procedureRoutes = require("./src/routes/procedureRoutes.js");
 
 app.use("/api/otp", otpRoutes);
 app.use("/api/auth", authRoutes);
@@ -51,6 +52,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/diagnosis",diagnosisRoutes);
 app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/patient_vitals", patientVitalRoutes);
+app.use("/api/procedure", procedureRoutes);
 
 app.all("*", (req, res) => {
   throw new ExpressError("Page Not Found", 404);
