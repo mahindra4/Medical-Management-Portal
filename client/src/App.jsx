@@ -50,6 +50,7 @@ import UpdatePrescription from "./pages/UpdatePrescription";
 import PatientVitalsList from "./pages/PatientVitalsList";
 import PatientVitalsDetail from "./pages/PatientVitalsDetail"
 import UpdatePatientVitals from "./pages/UpdatePatientVitals";
+import Procedure from "./pages/procedure";
 
 function App() {
   const { userRole } = useAuthContext();
@@ -137,6 +138,12 @@ function App() {
               <AddPurchase />
             </ProtectedRoute>
           } />
+          <Route path="/procedure" element={
+            <ProtectedRoute routeName="PROCEDURELIST">
+              <Procedure />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/purchase" element={
             <ProtectedRoute routeName="PURCHASE_LIST">
               <PurchaseList />
