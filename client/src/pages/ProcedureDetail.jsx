@@ -21,7 +21,7 @@ const ProcedureDetail = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [procedureData, setProcedureData] = useState({
-    opdNumber: "",
+    id: "",
     patientEmail: "",
     patientName: "",
     inTime: "",
@@ -35,7 +35,7 @@ const ProcedureDetail = () => {
 
   const handlePrint = () => {
     const element = document.getElementById("procedureDetail");
-    const pdfName = `Procedure-${procedureData.opdNumber}-${procedureData.patientName}`;
+    const pdfName = `Procedure-${procedureData.id}-${procedureData.patientName}`;
     html2pdf().from(element).set({ filename: pdfName }).save();
   };
 
@@ -77,7 +77,7 @@ const ProcedureDetail = () => {
                   Procedure Details
                 </Typography>
                 <Typography variant="h6" color="blue-gray" className="mb-2">
-                  OPD Number: {procedureData.opdNumber}
+                  OPD Number: {procedureData.id}
                 </Typography>
               </div>
               <div className="flex gap-x-2 h-10">
@@ -123,7 +123,7 @@ const ProcedureDetail = () => {
                     color="blue-gray"
                     className="mb-2 font-medium"
                   >
-                    {procedureData.opdNumber}
+                    {procedureData.id}
                   </Typography>
 
                   <Typography variant="small">Patient Name</Typography>
@@ -150,7 +150,7 @@ const ProcedureDetail = () => {
                     color="blue-gray"
                     className="mb-2 font-medium"
                   >
-                    {procedureData.inTime}
+                    {procedureData.inTime ? new Date(procedureData.inTime).toLocaleString() : "N/A"}
                   </Typography>
 
                   <Typography variant="small">Out Time</Typography>
@@ -159,7 +159,7 @@ const ProcedureDetail = () => {
                     color="blue-gray"
                     className="mb-2 font-medium"
                   >
-                    {procedureData.outTime}
+                    {procedureData.outTime ? new Date(procedureData.outTime).toLocaleString() : "N/A"}
                   </Typography>
 
                   <Typography variant="small">Referred Hospital</Typography>
