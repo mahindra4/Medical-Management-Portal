@@ -61,6 +61,8 @@ const roleMapping = new Map([
     [38,"ADD_HOSPITAL"],
     [39,"HOSPITAL_LIST"],
     [40,"UPDATE_HOSPITAL"],
+    [41,"ADD_VISITING_SPECIALIST"],
+    [42,"VISITING_SPECIALIST_LIST"],
     
 ]);
 
@@ -68,9 +70,9 @@ const roleMap = (role) => {
     if (role !== "ADMIN" && role !== "DOCTOR" && role !== "PARAMEDICAL" && role !== "PATIENT") {
         return [];
     }
-    const admin = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 26, 30, 31, 32,38,39,40];
-    const paramedical = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 28, 30, 31, 32, 33, 34, 35,36,37,38,39,40];
-    const doctor = [1, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 21, 22, 28, 30, 31, 32, 33, 34, 35,36,37,38,39,40];
+    const admin = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 26, 30, 31, 32,38,39,40,41,42];
+    const paramedical = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 28, 30, 31, 32, 33, 34, 35,36,37,38,39,40,41,42];
+    const doctor = [1, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 21, 22, 28, 30, 31, 32, 33, 34, 35,36,37,38,39,40,41,42];
     const patient = [25, 27, 29, 30, 31];  //Temp solution: patient is also allowed the access of 18 (prescription list), as he/she has to give access to medical history
 
     let roleArr = [];
