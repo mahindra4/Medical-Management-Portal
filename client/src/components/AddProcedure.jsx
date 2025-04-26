@@ -71,7 +71,8 @@ export function AddProcedure() {
         const generateOPDNumber = async () => {
             try {
                 const today = new Date();
-                const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear().toString().slice(-2)}`;
+                // Use a format without slashes - DDMMYY
+                const formattedDate = `${today.getDate().toString().padStart(2, '0')}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getFullYear().toString().slice(-2)}`;
                 
                 // Fetch today's procedures to determine next increment number
                 const response = await axios.get(apiRoutes.Procedure, {
@@ -175,7 +176,8 @@ export function AddProcedure() {
             
             // Reset form after successful submission
             const today = new Date();
-            const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear().toString().slice(-2)}`;
+            // Use the same format without slashes for the next OPD number
+            const formattedDate = `${today.getDate().toString().padStart(2, '0')}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getFullYear().toString().slice(-2)}`;
             
             // Get the current increment and add 1 for the next form
             const currentIncrement = parseInt(formData.opdNumber.split('-')[1], 10);
@@ -244,7 +246,7 @@ export function AddProcedure() {
                                         readOnly
                                         className="w-full border border-gray-300 rounded-md p-2 bg-gray-100"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Auto-generated OPD number</p>
+                                    <p className="text-xs text-gray-500 mt-1">Auto-generated OPD number (DDMMYY-#)</p>
                                 </div>
                                 
                                 <div>
