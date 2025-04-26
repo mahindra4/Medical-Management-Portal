@@ -18,6 +18,7 @@ const TABLE_HEAD = {
 import Layout from "../layouts/PageLayout";
 import { toast } from "sonner";
 import { apiRoutes } from "../utils/apiRoutes";
+import VisitingSpecialistBanner from "../components/VisitingSpecialistBanner";
 
 const getScheduleData = async () => {
     try {
@@ -54,20 +55,27 @@ const DoctorScheduleList = () => {
         <>
             {loading && <SyncLoadingScreen />}
             {!loading && (
-                <Layout>
-                    <SortableTable
-                        tableHead={TABLE_HEAD}
-                        title="Schedule"
-                        data={doctorSchedules}
-                        detail="See the current schedule of our doctors."
-                        text="Add Schedule"
-                        addLink="/schedule/add"
-                        searchKey="day"
-                        handleDelete={() => {}}
-                        actionFlag='false'
-                        showAddBtn={false}
-                    />
-                </Layout>
+                <>
+                    <div>
+                        {/* Visiting Specialist Banner */}
+                        <VisitingSpecialistBanner />
+                    </div>
+                    <Layout className="pl-20 md:pl-24"> {/* Increased left padding */}
+                        <SortableTable
+                            tableHead={TABLE_HEAD}
+                            title="Schedule"
+                            data={doctorSchedules}
+                            detail="See the current schedule of our doctors."
+                            text="Add Schedule"
+                            addLink="/schedule/add"
+                            searchKey="day"
+                            handleDelete={() => {}}
+                            actionFlag='false'
+                            showAddBtn={false}
+                            className="mx-auto max-w-6xl" /* Center the table with max width */
+                        />
+                    </Layout>
+                </>
             )}
         </>
     );
