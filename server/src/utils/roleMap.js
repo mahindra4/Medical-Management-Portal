@@ -45,6 +45,13 @@ const roleMapping = new Map([
     ["UPDATE_PATIENT", ["D", "A", "PM"]],
     ["DELETE_PATIENT", ["D", "A", "PM"]],
 
+     //specialist routes 
+    ["GET_SPECIALIST_LIST", ["D", "A", "PM", "P"]],
+    ["GET_SPECIALIST", ["D", "A", "PM", "P"]],
+    ["CREATE_SPECIALIST", ["D", "A", "PM"]],
+    ["UPDATE_SPECIALIST", ["D", "A", "PM"]],
+    ["DELETE_SPECIALIST", ["D", "A", "PM"]],
+
     // profile routes
     ["GET_PATIENT_PROFILE", ["P"]],
     ["UPDATE_PATIENT_PROFILE", ["P"]],
