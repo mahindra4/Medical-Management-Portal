@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { SyncLoadingScreen } from "../components/UI/LoadingScreen";
 import axios from "axios";
 import { apiRoutes } from "../utils/apiRoutes";
+import VisitingSpecialistBanner from "../components/VisitingSpecialistBanner";
 
 function getWindowDimensions() {
   const { innerWidth: width, innerHeight: height } = window;
@@ -226,6 +227,8 @@ const AdminDashboard = () => {
       {loading && <SyncLoadingScreen />}
       {!loading && <Layout>
         <div>
+          {/* Visiting Specialist Banner */}
+          <VisitingSpecialistBanner />
           <div className="grid-container -mt-7">
             <div className="mt-6 ml-4 text-gray-700 bg-white shadow-md bg-clip-border rounded-xl grid-item">
               <div className="p-6">
