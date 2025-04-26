@@ -4,13 +4,30 @@ const prisma = new PrismaClient();
 
 const getAllProcedures = async (req, res) => {
     try {
-        const procedures = await prisma.procedure.findMany({
-        });
-        res.status(200).json(procedures);
+      const procedures = await prisma.procedure.findMany({
+        select: {
+          id: true,
+          patientEmail: true,
+          patientName: true,
+          inTime: true,
+          procedureRecord: true,
+          patientConditionBefore: true,
+          referredHospital: true,
+          outTime: true,
+        }
+      });
+  
+      const formattedProcedures = procedures.map(proc => ({
+        ...proc,
+        opd: proc.id  // Add `opd` field same as `id`
+      }));
+  
+      res.status(200).json(formattedProcedures);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch procedures' });
+      console.error(error);
+      res.status(500).json({ error: 'Failed to fetch procedures' });
     }
-};
+  };
 
 const getProcedureById = async (req, res) => {
     try {
