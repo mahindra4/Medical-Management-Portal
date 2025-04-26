@@ -14,6 +14,7 @@ import {
   Tooltip,
   IconButton,
   Textarea,
+  Checkbox,
 } from "@material-tailwind/react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +41,8 @@ export default function AddPrescriptionForm() {
     symptoms: "",
     diagnosis: "",
     referredHospital: "",
-    referredDoctor: ""
+    referredDoctor: "",
+    isUnderObservation: false,
   });
 
   const [doctors, setDoctors] = useState([]);
@@ -50,16 +52,38 @@ export default function AddPrescriptionForm() {
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [diagnosisSymptomsList, setDiagnosisSymptomsList] = useState({});
   const [selectedDiagnosis, setSelectedDiagnosis] = useState([]);
-  const [symptom, setSymptom] = useState("")
+  const [symptom, setSymptom] = useState("");
   const [hosptialList, setHospitalList] = useState([]);
   const [selectedHospital, setSelectedHospital] = useState({});
   const [receivedOpdId, setReceivedOpdId] = useState("");
+
+  // Observation related state
+  const [observationDetails, setObservationDetails] = useState([]);
+  const [showObservationForm, setShowObservationForm] = useState(false);
+  const [currentObservationItem, setCurrentObservationItem] = useState({
+    medicineId: "",
+    name: "",
+    dosage: "",
+    frequency: "",
+    dailyQuantity: "",
+    days: 1,
+    availableQty: 0
+  });
 
   const TABLE_HEAD = [
     "Medicine Name",
     "Dosage",
     "Quantity",
     "Avl. Qty",
+    "Action",
+  ];
+  const OBSERVATION_TABLE_HEAD = [
+    "Medicine",
+    "Dosage ",
+    "Frequency ",
+    "Daily Qty",
+    "Avl. Qty",    
+    "Days",        
     "Action",
   ];
   const [dataArray, setDataArray] = useState([
@@ -79,11 +103,94 @@ export default function AddPrescriptionForm() {
   const HANDLE_SYMPTOM_CHANGE = "handleSymptomChange";
   const HANDLE_HOSPITAL_CHANGE = "handleHospitalChange";
   const HANDLE_RECEIVED_OPD = "handleReceivedOpd";
+  const HANDLE_OBSERVATION_CHANGE = "handleObservationChange";
 
-  useEffect(
-    () => async () => {
-      // Fetch doctors list when the component mounts
-      // fetchDoctors();
+  // Observation handlers
+  const updateObservationDetail = (index, field, value) => {
+    const updatedDetails = [...observationDetails];
+    updatedDetails[index][field] = value;
+    
+    // Clear the other type when one is selected
+    if (field === "medicineId" && value) {
+      updatedDetails[index].equipmentType = "";
+    } else if (field === "equipmentType" && value) {
+      updatedDetails[index].medicineId = "";
+    }
+    
+    setObservationDetails(updatedDetails);
+    saveObservationData();
+  };
+
+  const removeObservationDetail = (index) => {
+    const updatedDetails = observationDetails.filter((_, i) => i !== index);
+    setObservationDetails(updatedDetails);
+    saveObservationData();
+  };
+
+  const saveObservationData = () => {
+    const data = {
+      isUnderObservation: formData.isUnderObservation,
+      details: observationDetails
+    };
+    sessionStorage.setItem(HANDLE_OBSERVATION_CHANGE, JSON.stringify(data));
+  };
+
+  const handleObservationMedicineChange = (selectedMedicine) => {
+    const selectedMed = medicines.find(m => m.value === selectedMedicine.value);
+    
+    setCurrentObservationItem({
+      ...currentObservationItem,
+      medicineId: selectedMedicine.value,
+      name: selectedMedicine.label,
+      availableQty: selectedMed.quantity,
+      dailyQuantity: "",
+    });
+  };
+
+  const handleObservationChange = (e) => {
+    const { checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      isUnderObservation: checked,
+    }));
+    setShowObservationForm(checked);
+    saveObservationData();
+  };
+
+  const addObservationDetail = () => {
+    if (!currentObservationItem.medicineId) {
+      toast.error("Please select a medicine");
+      return;
+    }
+    
+    // Find the selected medicine
+    const selectedMed = medicines.find(m => m.medicineId === currentObservationItem.medicineId);
+  
+    // Add to observationDetails
+    setObservationDetails([...observationDetails, {
+      medicineId: currentObservationItem.medicineId,
+      name: selectedMed?.medicineName || "",
+      dosage: currentObservationItem.dosage || "",
+      frequency: currentObservationItem.frequency || "",
+      dailyQuantity: currentObservationItem.dailyQuantity,
+      days: currentObservationItem.days,
+      availableQty: selectedMed?.netQuantity || 0
+    }]);
+  
+    // Reset input fields
+    setCurrentObservationItem({
+      medicineId: null,
+      name: "",
+      dosage: "",
+      frequency: "",
+      dailyQuantity: "",
+      days: 1,
+      availableQty: 0
+    });
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
       setLoading(true);
       await fetchAvailableStock();
       await fetchDoctors();
@@ -100,78 +207,63 @@ export default function AddPrescriptionForm() {
       const symptom = sessionStorage.getItem(HANDLE_SYMPTOM_CHANGE);
       const hospital = sessionStorage.getItem(HANDLE_HOSPITAL_CHANGE);
       const opd = sessionStorage.getItem(HANDLE_RECEIVED_OPD);
+      const observationData = sessionStorage.getItem(HANDLE_OBSERVATION_CHANGE);
 
-      if(opd !== null){
+      if (opd !== null) {
         setReceivedOpdId(opd);
       }
-      // console.log("initial---------------------------")
-      // console.log("form_data: ", form_data);
-      // console.log("patient_email: ",patient_email);
-      // console.log("doctor_email: ", doctor_email);
-      // console.log("diagnosis: ", diagnosis);
-      // console.log("diagnosisVal: ", diagnosisVal);
-      // console.log("symptom: ", symptom);
+
+      if (observationData) {
+        const parsedData = JSON.parse(observationData);
+        setFormData(prev => ({
+          ...prev,
+          isUnderObservation: parsedData.isUnderObservation
+        }));
+        setObservationDetails(parsedData.details || []);
+        setShowObservationForm(parsedData.isUnderObservation);
+      }
 
       setFormData((prevData) => ({
         ...prevData,
         date: new Date().toISOString().split('T')[0],
-      }))
+      }));
 
-      if(form_data != null){
-        setFormData(JSON.parse(form_data))
+      if (form_data != null) {
+        setFormData(JSON.parse(form_data));
       }
-      if(patient_email != null){
-        setSelectedPatient(JSON.parse(patient_email))
+      if (patient_email != null) {
+        setSelectedPatient(JSON.parse(patient_email));
       }
-
-      if(doctor_email != null){
-        setSelectedDoctor(JSON.parse(doctor_email))
+      if (doctor_email != null) {
+        setSelectedDoctor(JSON.parse(doctor_email));
       }
-
-      if(diagnosis != null){
-        setSelectedDiagnosis(JSON.parse(diagnosis))
+      if (diagnosis != null) {
+        setSelectedDiagnosis(JSON.parse(diagnosis));
         setFormData((prevData) => ({
           ...prevData,
           diagnosis: diagnosisVal
-        }))
+        }));
       }
-
-      if(symptom != null){
+      if (symptom != null) {
         setFormData((prevData) => ({
           ...prevData,
           symptoms: symptom,
-        }))
+        }));
       }
-
-      if(hospital != null){
+      if (hospital != null) {
         setSelectedHospital(JSON.parse(hospital));
       }
 
-      // console.log("formData: ", formData);
-      // if(savedData){
-      //   setFormData(JSON.parse(savedData)) 
-      //   console.log(JSON.parse(savedData))
-      // }
-
-      const medical_data = sessionStorage.getItem(HANDLE_INPUT_CHANGE_KEY)
-      if(medical_data != null){
-        setDataArray(JSON.parse(medical_data))
+      const medical_data = sessionStorage.getItem(HANDLE_INPUT_CHANGE_KEY);
+      if (medical_data != null) {
+        setDataArray(JSON.parse(medical_data));
       }
 
-      // const medicine_data = sessionStorage.getItem(HANDLE_SELECTED_MEDICINE)
-      // if(medicine_data){
-      //   // console.log(JSON.parse(medicine_data))
-      //   setDataArray(JSON.parse(medicine_data))
-      // } 
-
-      // formData.date = // default date => today
-
-      // console.log("formData: ", formData);
-      // console.log("formData symptoms: ", formData.symptoms);
       setLoading(false);
-    },
-    []
-  );
+    };
+
+    fetchData();
+  }, []);
 
   const fetchDoctors = async () => {
     try {
@@ -192,6 +284,7 @@ export default function AddPrescriptionForm() {
       );
     }
   };
+
   const fetchPatients = async () => {
     try {
       const response = await axios.get(apiRoutes.patient, {
@@ -214,7 +307,7 @@ export default function AddPrescriptionForm() {
         withCredentials: true,
       });
       console.log(response.data.data);
-      setMedicines(response.data.data); // Assuming the response is an array of medicines
+      setMedicines(response.data.data);
     } catch (error) {
       console.error(
         `ERROR (fetch-medicines-in-add-purchase): ${error?.response?.data?.message}`
@@ -226,192 +319,135 @@ export default function AddPrescriptionForm() {
   };
 
   const fetchDiagnosisList = async () => {
-    try{
+    try {
       const response = await axios.get(apiRoutes.diagnosis, {
         withCredentials: true,
-      })
-      // console.log(response.data.data);
+      });
       setDiagnosisList(response.data.data);
-      console.log('diagnosis data')
-      console.log(response.data.data)
-      // console.log(diagnosisList)
-    } catch(err){
-      console.error(`Error in fetching Diagnosis List: ${err?.response.data?.message}`)
+    } catch (err) {
+      console.error(`Error in fetching Diagnosis List: ${err?.response.data?.message}`);
       toast.error(
-        error?.response?.data?.message || "Failed to fetch Diagnosis list"
-      )
+        err?.response?.data?.message || "Failed to fetch Diagnosis list"
+      );
     }
   };
 
   const fetchDiagnosisSymptomsList = async () => {
-    try{
-      const response = await axios.get(`${apiRoutes.diagnosis}/symptoms`,{
+    try {
+      const response = await axios.get(`${apiRoutes.diagnosis}/symptoms`, {
         withCredentials: true
-      })
-      console.log(`${apiRoutes.diagnosis}/symptoms`)
-      console.log(response.data.data)
-      setDiagnosisSymptomsList(response.data.data)
-
-    } catch(err){
-      console.error(`Error in fetching Diagnosis Symptoms List: ${err?.response.data?.message}`)
+      });
+      setDiagnosisSymptomsList(response.data.data);
+    } catch (err) {
+      console.error(`Error in fetching Diagnosis Symptoms List: ${err?.response.data?.message}`);
       toast.error(
-        error?.response?.data?.message || "Failed to fetch Diagnosis list"
-      )
+        err?.response?.data?.message || "Failed to fetch Diagnosis list"
+      );
     }
-  }
+  };
 
   const fetchHospitalList = async () => {
-    try{
+    try {
       const response = await axios.get(apiRoutes.hospitals, {
         withCredentials: true
       });
       setHospitalList(response.data.data);
-    } catch(err){
+    } catch (err) {
       console.error(`Error in fetching Hospital List: ${err?.response.data?.message}`);
       toast.error(
-        error?.response?.data?.message || "Failed to Hospital list"
-      )
+        err?.response?.data?.message || "Failed to Hospital list"
+      );
     }
-  }
+  };
 
   const handleInputChange = (key, index, value) => {
-    // console.log(dataArray)
-    console.log('handle Input Change')
-    console.log(`key: ${key}`);
-    console.log(`index: ${index}`);
-    console.log(`value: ${value}`);
     const updatedArray = [...dataArray];
-    console.log(updatedArray);
     updatedArray[index][key] = value;
     setDataArray(updatedArray);
-    console.log(updatedArray)
-
-    sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY,JSON.stringify(updatedArray))
-
+    sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY, JSON.stringify(updatedArray));
   };
 
   const handleDoctorChange = (selectedDoctor) => {
-    console.log('handle Doctor Change')
-    console.log(selectedDoctor);
     setSelectedDoctor(selectedDoctor);
-
-    const doctorVal = selectedDoctor ? selectedDoctor.value : ""
+    const doctorVal = selectedDoctor ? selectedDoctor.value : "";
     setFormData((prevData) => ({
       ...prevData,
       doctor: doctorVal,
     }));
-    sessionStorage.setItem(HANDLE_DOCTOR_EMAIL,JSON.stringify(selectedDoctor))
+    sessionStorage.setItem(HANDLE_DOCTOR_EMAIL, JSON.stringify(selectedDoctor));
   };
 
   const handleDiagnosisChange = (selectedDiagnosis) => {
-    console.log("selected diagnosis: ",selectedDiagnosis)
     setSelectedDiagnosis(selectedDiagnosis);
+    sessionStorage.setItem(HANDLE_DIAGNOSIS_CHANGE, JSON.stringify(selectedDiagnosis));
+    
+    let diagnosisVal = "";
+    let symptomsVal = "";
 
-    sessionStorage.setItem(HANDLE_DIAGNOSIS_CHANGE,JSON.stringify(selectedDiagnosis))
-    var diagnosisVal = "";
-    var symptomsVal = "";
-
-    // if(selectedDiagnosis){
-      for(let diagnosis of selectedDiagnosis){
-        if(diagnosisVal === ""){
-          diagnosisVal = diagnosis.value;
-        }
-        else{
-          diagnosisVal = diagnosisVal+", "+diagnosis.value;
-        }
-        const symptomsList = diagnosisSymptomsList[diagnosis.value].join(", ");
-        if(symptomsVal === ""){
-          symptomsVal = symptomsList;
-        }
-        else{
-          symptomsVal = symptomsVal+", "+symptomsList
-        }
+    for (let diagnosis of selectedDiagnosis) {
+      if (diagnosisVal === "") {
+        diagnosisVal = diagnosis.value;
+      } else {
+        diagnosisVal = diagnosisVal + ", " + diagnosis.value;
       }
-      // symptomsVal = symptomsList.join(", ");
-    // }
-    sessionStorage.setItem(HANDLE_DIAGNOSIS_VALUE_CHANGE,diagnosisVal)
-    sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,symptomsVal)
+      const symptomsList = diagnosisSymptomsList[diagnosis.value].join(", ");
+      if (symptomsVal === "") {
+        symptomsVal = symptomsList;
+      } else {
+        symptomsVal = symptomsVal + ", " + symptomsList;
+      }
+    }
 
-    console.log(`diagnosisval: ${diagnosisVal}`);
-    console.log(formData.date)
+    sessionStorage.setItem(HANDLE_DIAGNOSIS_VALUE_CHANGE, diagnosisVal);
+    sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE, symptomsVal);
+
     setFormData((prevData) => ({
       ...prevData,
       diagnosis: diagnosisVal,
       symptoms: symptomsVal,
-    }))
-
-    console.log(formData)
-    // add it in the session storage for draft feature and update it in the useEffect
-  }
+    }));
+  };
 
   const handleHospitalChange = (selectedHospital) => {
-    console.log("selected hospital: ",selectedHospital); 
     setSelectedHospital(selectedHospital);
-
     const referredHospital = (selectedHospital) ? selectedHospital.value : "";
     setFormData((prevData) => ({
       ...prevData,
       referredHospital,
-    }))
-
+    }));
     sessionStorage.setItem(HANDLE_HOSPITAL_CHANGE, JSON.stringify(selectedHospital));
-  } 
+  };
 
   const handlePatientChange = (selectedPatient) => {
-    console.log('handle Patient Change')
-    console.log(selectedPatient);
-
     setSelectedPatient(selectedPatient);
-
     const patientVal = (selectedPatient) ? selectedPatient.value : "";
-
     setFormData((prevData) => ({
       ...prevData,
       email: patientVal,
     }));
-    sessionStorage.setItem(HANDLE_PATIENT_EMAIL,JSON.stringify(selectedPatient))
+    sessionStorage.setItem(HANDLE_PATIENT_EMAIL, JSON.stringify(selectedPatient));
   };
+
   const handleMedicineChange = (selectedMedicine, index) => {
-    console.log('handle Medicine Change')
-    console.log(selectedMedicine);
     setSelectedMedicine(selectedMedicine);
-
-    
-    // console.log('------------------------')
-
     setDataArray((prevData) => {
       const updatedArray = [...prevData];
       updatedArray[index].name = selectedMedicine;
-      console.log(updatedArray);
-      sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY,JSON.stringify(updatedArray))
+      sessionStorage.setItem(HANDLE_INPUT_CHANGE_KEY, JSON.stringify(updatedArray));
       return updatedArray;
     });
   };
 
   const handleChange = (name, value) => {
-    console.log('handle Change')
-    // console.log(e.target);
-    // const { name, value } = e.target;
-    console.log(name, value);
-
     const updatedData = {
       ...formData,
       [name]: value
-    }
-    console.log('updatedData')
-    console.log(updatedData)
-
-    // setFormData((prevData) => ({
-    //   ...prevData,
-    //   [name]: value,
-    // }));
+    };
     setFormData(updatedData);
-    sessionStorage.setItem(FORM_STORAGE_KEY,JSON.stringify(updatedData))
-
+    sessionStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(updatedData));
   };
 
   const handleSave = async (e) => {
-    console.log('handle save')
     e.preventDefault();
     const checkupListEntry = {
       id: receivedOpdId,
@@ -422,48 +458,44 @@ export default function AddPrescriptionForm() {
     if (formData.temperature) {
       checkupListEntry.temperature = formData.temperature;
     }
-
     if (formData.pulseRate) {
       checkupListEntry.pulseRate = formData.pulseRate;
     }
-
     if (formData.spO2) {
       checkupListEntry.spO2 = formData.spO2;
     }
-
     if (formData.bloodPressure) {
       checkupListEntry.bloodPressure = formData.bloodPressure;
     }
 
-    console.log("Sending data:", checkupListEntry);
-
-    try{
+    try {
       const response = await axios.post(apiRoutes.patientVitals + "/save", checkupListEntry, {
         withCredentials: true,
       });
       setReceivedOpdId(response?.data?.vitals?.id);
-      sessionStorage.setItem(HANDLE_RECEIVED_OPD, receivedOpdId);
-      console.log("Save successful:", response.data.vitals.id);
+      sessionStorage.setItem(HANDLE_RECEIVED_OPD, response?.data?.vitals?.id);
       toast.success(response.data.message);
-    } catch(error) {
+    } catch (error) {
       console.error("Error saving vitals:", error.response?.data || error.message);
       toast.error(`Error: ${error.response?.data?.message || "Something went wrong"}`);
     }
-
-  }
+  };
 
   const handleSubmit = async (e) => {
-    console.log('handle Submit')
     e.preventDefault();
-    // Here you can handle the submission of the form
-    console.log(formData.diagnosis)
+    if (formData.isUnderObservation && observationDetails.length === 0) {
+      toast.error("Please add at least 1 medicine for observation patients");
+      return;
+    }
+
     const checkupListEntry = {
       id: receivedOpdId,
       patientId: selectedPatient?.value,
       date: formData.date,
       diagnosis: formData.diagnosis,
+      isUnderObservation: formData.isUnderObservation,
     };
-    //optional fields
+
     if (selectedDoctor?.value) {
       checkupListEntry.doctorId = selectedDoctor?.value;
     }
@@ -482,13 +514,24 @@ export default function AddPrescriptionForm() {
     if (formData.symptoms) {
       checkupListEntry.symptoms = formData.symptoms;
     }
-    if(formData.referredDoctor){
+    if (formData.referredDoctor) {
       checkupListEntry.referredDoctor = formData.referredDoctor;
     }
-    if(formData.referredHospital){
+    if (formData.referredHospital) {
       checkupListEntry.referredHospital = formData.referredHospital;
     }
 
+    let observationData = null;
+    if (formData.isUnderObservation) {
+      observationData = observationDetails.map(detail => ({
+        medicineId: detail.medicineId,
+        dosage: detail.dosage,
+        frequency: detail.frequency,
+        dailyQuantity: parseInt(detail.dailyQuantity) || 1,
+        days: parseInt(detail.days) || 1,
+        availableQty: parseInt(detail.availableQty) 
+      }));
+    }
 
     const checkupMedicines = dataArray.map((data) => {
       const medicines = {
@@ -503,44 +546,42 @@ export default function AddPrescriptionForm() {
       ...checkupListEntry,
       staffEmail: userEmail,
       checkupMedicines,
+      observationDetails: observationData,
     };
-    console.log(data);
+
     setLoading(true);
     try {
       const response = await axios.post(apiRoutes.checkup, data, {
         withCredentials: true,
       });
       setReceivedOpdId("");
-      console.log(response.data);
       toast.success(response.data.message);
 
-      sessionStorage.removeItem(FORM_STORAGE_KEY) 
-      sessionStorage.removeItem(HANDLE_INPUT_CHANGE_KEY) 
-      sessionStorage.removeItem(HANDLE_SELECTED_MEDICINE) 
-      sessionStorage.removeItem(HANDLE_PATIENT_EMAIL) 
-      sessionStorage.removeItem(HANDLE_DOCTOR_EMAIL) 
-      sessionStorage.removeItem(HANDLE_DIAGNOSIS_CHANGE)
-      sessionStorage.removeItem(HANDLE_DIAGNOSIS_VALUE_CHANGE)
-      sessionStorage.removeItem(HANDLE_SYMPTOM_CHANGE)
-      sessionStorage.removeItem(HANDLE_HOSPITAL_CHANGE)
-      sessionStorage.removeItem(HANDLE_RECEIVED_OPD)
+      [
+        FORM_STORAGE_KEY,
+        HANDLE_INPUT_CHANGE_KEY,
+        HANDLE_SELECTED_MEDICINE,
+        HANDLE_PATIENT_EMAIL,
+        HANDLE_DOCTOR_EMAIL,
+        HANDLE_DIAGNOSIS_CHANGE,
+        HANDLE_DIAGNOSIS_VALUE_CHANGE,
+        HANDLE_SYMPTOM_CHANGE,
+        HANDLE_HOSPITAL_CHANGE,
+        HANDLE_RECEIVED_OPD,
+        HANDLE_OBSERVATION_CHANGE
+      ].forEach(key => sessionStorage.removeItem(key));
+
       setTimeout(() => {
         navigate("/prescription");
       }, 1000);
     } catch (error) {
-      console.error(
-        `ERROR (add-prescription): ${error?.response?.data?.message}`
-      );
-      toast.error(
-        error?.response?.data?.message || "Failed to add Prescription"
-      );
+      console.error(`ERROR (add-prescription): ${error?.response?.data?.message}`);
+      toast.error(error?.response?.data?.message || "Failed to add Prescription");
     }
     setLoading(false);
-
   };
 
   const handleAddRow = () => {
-    console.log('handle Add Row')
     setDataArray((prevData) => [
       ...prevData,
       { name: "", dosage: "", quantity: "" },
@@ -548,7 +589,6 @@ export default function AddPrescriptionForm() {
   };
 
   const handleDeleteRow = (index) => {
-    console.log('handle Delete Row')
     if (dataArray.length === 1) {
       toast.error("Atleast one Medicine is required in the prescription");
       return;
@@ -560,17 +600,13 @@ export default function AddPrescriptionForm() {
     });
   };
 
-  return (
+   return (
     <>
       {loading && <SyncLoadingScreen />}
       {!loading && (
         <Layout>
           <Card className="h-max w-full">
-            <CardHeader
-              floated={false}
-              shadow={false}
-              className="rounded-none pb-3"
-            >
+            <CardHeader floated={false} shadow={false} className="rounded-none pb-3">
               <div className="mb-2 sm:flex sm:flex-row flex-col items-center justify-between gap-8">
                 <div>
                   <Typography variant="h5" color="blue-gray">
@@ -581,26 +617,21 @@ export default function AddPrescriptionForm() {
                   <Button
                     className="flex items-center gap-3"
                     size="md"
-                    onClick={() => {
-                      navigate("/prescription");
-                    }}
+                    onClick={() => navigate("/prescription")}
                   >
                     Prescription List
                   </Button>
-
                   <Button
                     className="flex items-center gap-3"
                     size="md"
                     onClick={handleSave}
                   >
-                    Save Vitals                   </Button>
-
+                    Save Vitals
+                  </Button>
                   <Button
                     className="flex items-center gap-3"
                     size="md"
-                    onClick={() => {
-                      navigate("/patient_vitals")
-                    }}
+                    onClick={() => navigate("/patient_vitals")}
                   >
                     Patient Vitals List
                   </Button>
@@ -610,6 +641,7 @@ export default function AddPrescriptionForm() {
             <CardBody>
               <form onSubmit={handleSubmit} className="flex flex-wrap gap-6">
                 <div className="grid md:grid-cols-2 gap-y-8 gap-x-4 w-full">
+                  {/* Patient Email */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-4 w-full md:w-72 justify-end">
                       <label htmlFor="email">
@@ -631,8 +663,10 @@ export default function AddPrescriptionForm() {
                       isClearable={true}
                     />
                   </div>
+  
+                  {/* Patient Name */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
-                    <div className="flex mr-2 w-full md:w-72 justify-end ">
+                    <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="name">
                         Patient Name <span className="text-red-800">*</span>:
                       </label>
@@ -647,6 +681,8 @@ export default function AddPrescriptionForm() {
                       disabled
                     />
                   </div>
+  
+                  {/* Temperature */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="temperature">Temp.(C)</label>:
@@ -658,11 +694,11 @@ export default function AddPrescriptionForm() {
                       label="Temperature"
                       className="w-full"
                       value={formData.temperature}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
+                      onChange={(e) => handleChange(e.target.name, e.target.value)}
                     />
                   </div>
+  
+                  {/* Pulse Rate */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="pulseRate">PR(beats/min)</label>:
@@ -676,14 +712,14 @@ export default function AddPrescriptionForm() {
                       label="Pulse Rate"
                       className="w-full"
                       value={formData.pulseRate}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
+                      onChange={(e) => handleChange(e.target.name, e.target.value)}
                     />
                   </div>
+  
+                  {/* SpO2 */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="pulseRate">SpO2 (%)</label>:
+                      <label htmlFor="spO2">SpO2 (%)</label>:
                     </div>
                     <Input
                       id="spO2"
@@ -692,11 +728,11 @@ export default function AddPrescriptionForm() {
                       label="SpO2"
                       className="w-full"
                       value={formData.spO2}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
+                      onChange={(e) => handleChange(e.target.name, e.target.value)}
                     />
                   </div>
+  
+                  {/* Blood Pressure */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="bloodPressure">BP(mm Hg)</label>:
@@ -708,11 +744,11 @@ export default function AddPrescriptionForm() {
                       label="Blood pressure"
                       className="w-full"
                       value={formData.bloodPressure}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
+                      onChange={(e) => handleChange(e.target.name, e.target.value)}
                     />
                   </div>
+  
+                  {/* Date */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="date">
@@ -730,14 +766,16 @@ export default function AddPrescriptionForm() {
                       onChange={(e) => {
                         let value = e.target.value;
                         const today = new Date().toISOString().split("T")[0];
-                        if(value > today){
+                        if (value > today) {
                           value = today;
-                          toast.error("prescription date can't be in the future");
+                          toast.error("Prescription date can't be in the future");
                         }
-                        handleChange(e.target.name, value)
+                        handleChange(e.target.name, value);
                       }}
                     />
                   </div>
+  
+                  {/* Doctor */}
                   <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
                       <label htmlFor="doctor">Doctor:</label>
@@ -756,21 +794,34 @@ export default function AddPrescriptionForm() {
                       isClearable={true}
                     />
                   </div>
-
+  
+                  {/* Observation Checkbox */}
+                  <div className="flex-col md:flex md:flex-row items-center justify-around p-1">
+                    <div className="flex mr-2 w-full md:w-72 justify-end">
+                      <label htmlFor="isUnderObservation">Patient Under Observation:</label>
+                    </div>
+                    <Checkbox
+                      id="isUnderObservation"
+                      name="isUnderObservation"
+                      checked={formData.isUnderObservation}
+                      onChange={handleObservationChange}
+                      className="h-5 w-5"
+                    />
+                  </div>
+  
+                  {/* Diagnosis */}
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">
+                      <label htmlFor="diagnosis">
                         Diagnosis<span className="text-red-800">*</span>:
                       </label>
                     </div>
                     <Select
                       id="diagnosis"
-                      options={
-                        diagnosisList.map((diagnosis) => ({
-                          value: diagnosis,
-                          label: diagnosis,
-                        }))
-                      }
+                      options={diagnosisList.map((diagnosis) => ({
+                        value: diagnosis,
+                        label: diagnosis,
+                      }))}
                       isMulti
                       name="diagnosis"
                       placeholder="Select Diagnosis"
@@ -779,23 +830,12 @@ export default function AddPrescriptionForm() {
                       onChange={handleDiagnosisChange}
                       isClearable={true}
                     />
-                    {/* <Textarea
-                      id="diagnosis"
-                      size="md"
-                      label="Diagnosis"
-                      name="diagnosis"
-                      type="text"
-                      className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
-                      value={formData.diagnosis}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
-                    /> */}
                   </div>
-
+  
+                  {/* Symptoms */}
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">Symptoms:</label>
+                      <label htmlFor="symptoms">Symptoms:</label>
                     </div>
                     <Textarea
                       id="symptoms"
@@ -805,15 +845,17 @@ export default function AddPrescriptionForm() {
                       type="text"
                       className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
                       value={formData.symptoms}
-                      onChange={(e) =>{
-                        sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE,e.target.value)
-                        handleChange(e.target.name, e.target.value)
+                      onChange={(e) => {
+                        sessionStorage.setItem(HANDLE_SYMPTOM_CHANGE, e.target.value);
+                        handleChange(e.target.name, e.target.value);
                       }}
                     />
                   </div>
+  
+                  {/* Referred Doctor */}
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">Referred Doctor:</label>
+                      <label htmlFor="referredDoctor">Referred Doctor:</label>
                     </div>
                     <Textarea
                       id="referredDoctor"
@@ -823,36 +865,21 @@ export default function AddPrescriptionForm() {
                       type="text"
                       className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
                       value={formData.referredDoctor}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
+                      onChange={(e) => handleChange(e.target.name, e.target.value)}
                     />
                   </div>
+  
+                  {/* Referred Hospital */}
                   <div className="flex-col md:flex md:flex-row items-start justify-around p-1">
                     <div className="flex mr-2 w-full md:w-72 justify-end">
-                      <label htmlFor="date">Referred Hospital:</label>
+                      <label htmlFor="referredHospital">Referred Hospital:</label>
                     </div>
-                    {/* <Textarea
-                      id="referredHospital"
-                      size="md" 
-                      label="Referred Hospital"
-                      name="referredHospital"
-                      type="text"
-                      className="w-full border-blue-gray-200 border h-10 px-3 rounded-lg min-w-[200px]"
-                      value={formData.referredHospital}
-                      onChange={(e) =>
-                        handleChange(e.target.name, e.target.value)
-                      }
-                    /> */}
-
                     <Select
                       id="referredHospital"
-                      options={
-                        hosptialList.map((hospital) => ({
-                          value: hospital,
-                          label: hospital
-                        }))
-                      }
+                      options={hosptialList.map((hospital) => ({
+                        value: hospital,
+                        label: hospital
+                      }))}
                       name="referredHospital"
                       placeholder="Select Hospital"
                       className="w-full"
@@ -862,8 +889,9 @@ export default function AddPrescriptionForm() {
                     />
                   </div>
                 </div>
-
-                <div className="w-full ">
+  
+                {/* Prescription Medicines Table */}
+                <div className="w-full">
                   <table className="w-full min-w-max table-auto text-left">
                     <thead>
                       <tr>
@@ -888,7 +916,7 @@ export default function AddPrescriptionForm() {
                     </thead>
                     <tbody>
                       {dataArray.map((data, index) => (
-                        <tr className="even:bg-blue-gray">
+                        <tr className="even:bg-blue-gray" key={index}>
                           <td className="p-4">
                             <Select
                               id="medicine"
@@ -913,11 +941,7 @@ export default function AddPrescriptionForm() {
                               placeholder="Dosage"
                               value={data["dosage"]}
                               onChange={(e) =>
-                                handleInputChange(
-                                  "dosage",
-                                  index,
-                                  e.target.value
-                                )
+                                handleInputChange("dosage", index, e.target.value)
                               }
                             />
                           </td>
@@ -930,11 +954,7 @@ export default function AddPrescriptionForm() {
                                 placeholder="Quantity"
                                 value={data["quantity"]}
                                 onChange={(e) =>
-                                  handleInputChange(
-                                    "quantity",
-                                    index,
-                                    e.target.value
-                                  )
+                                  handleInputChange("quantity", index, e.target.value)
                                 }
                               />
                             </div>
@@ -975,6 +995,245 @@ export default function AddPrescriptionForm() {
                     </tbody>
                   </table>
                 </div>
+  
+                {/* Observation Treatment Plan Section */}
+                {formData.isUnderObservation && (
+  <div className="w-full mt-6">
+    <Typography variant="h6" color="blue-gray" className="mb-4">
+      Observation Treatment Plan
+    </Typography>
+    <table className="w-full min-w-max table-auto text-left">
+      <thead>
+        <tr>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Medicine
+            </Typography>
+          </th>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Dosage
+            </Typography>
+          </th>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Frequency
+            </Typography>
+          </th>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Daily Qty
+            </Typography>
+          </th>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Avl. Qty
+            </Typography>
+          </th>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Days
+            </Typography>
+          </th>
+          <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
+              Action
+            </Typography>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {/* Existing observation details rows */}
+        {observationDetails.map((detail, index) => (
+          <tr key={index} className="even:bg-blue-gray-50/50">
+            <td className="p-4">
+              <div className="w-[200px] border border-gray-300 rounded p-2 h-10 flex items-center">
+                <Typography variant="small" color="blue-gray" className="truncate">
+                  {detail.name}
+                </Typography>
+              </div>
+            </td>
+            <td className="p-4">
+              <div className="w-[200px] border border-gray-300 rounded p-2 h-10 flex items-center">
+                <Typography variant="small" color="blue-gray" className="truncate">
+                  {detail.dosage || "-"}
+                </Typography>
+              </div>
+            </td>
+            <td className="p-4">
+              <div className="w-[150px] border border-gray-300 rounded p-2 h-10 flex items-center">
+                <Typography variant="small" color="blue-gray">
+                  {detail.frequency}
+                </Typography>
+              </div>
+            </td>
+            <td className="p-4">
+              <div className="w-[80px] border border-gray-300 rounded p-2 h-10 flex items-center">
+                <Typography variant="small" color="blue-gray">
+                  {detail.dailyQuantity}
+                </Typography>
+              </div>
+            </td>
+            <td className="p-4">
+              <div className="w-[80px] border border-gray-300 rounded p-2 h-10 flex items-center">
+                <Typography variant="small" color="blue-gray">
+                  {detail.availableQty || "-"}
+                </Typography>
+              </div>
+            </td>
+            <td className="p-4">
+              <div className="w-[80px] border border-gray-300 rounded p-2 h-10 flex items-center">
+                <Typography variant="small" color="blue-gray">
+                  {detail.days || "1"}
+                </Typography>
+              </div>
+            </td>
+            <td className="p-4">
+              <Tooltip content="Delete">
+                <IconButton
+                  variant="text"
+                  color="red"
+                  onClick={() => removeObservationDetail(index)}
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </IconButton>
+              </Tooltip>
+            </td>
+          </tr>
+        ))}
+
+        {/* Add new medicine row */}
+        <tr className="even:bg-blue-gray-50/50">
+          <td className="p-4">
+            <div className="w-[200px]">
+              <Select
+                options={medicines.map(m => ({
+                  value: m.medicineId,
+                  label: m.medicineName,
+                  quantity: m.netQuantity
+                }))}
+                value={currentObservationItem.medicineId ? 
+                  { 
+                    value: currentObservationItem.medicineId, 
+                    label: currentObservationItem.name 
+                  } 
+                  : null}
+                onChange={(selected) => {
+                  const med = medicines.find(m => m.medicineId === selected?.value);
+                  setCurrentObservationItem({
+                    ...currentObservationItem,
+                    medicineId: selected?.value,
+                    name: selected?.label,
+                    availableQty: med?.netQuantity || 0
+                  });
+                }}
+                placeholder="Select Medicine"
+                className="w-full border border-gray-300 rounded h-10"
+                required
+              />
+            </div>
+          </td>
+          <td className="p-4">
+            <div className="w-[200px]">
+              <Input
+                type="text"
+                size="md"
+                value={currentObservationItem.dosage}
+                onChange={(e) => setCurrentObservationItem({
+                  ...currentObservationItem,
+                  dosage: e.target.value || undefined 
+                })}
+                placeholder="Optional"
+                className="w-full border border-gray-300 rounded h-10"
+              />
+            </div>
+          </td>
+          <td className="p-4">
+            <div className="w-[150px]">
+              <select
+                className="w-full border border-gray-300 rounded p-2 h-10"
+                value={currentObservationItem.frequency}
+                onChange={(e) => {
+                  const frequency = e.target.value;
+                  let dailyQuantity = currentObservationItem.dailyQuantity;
+                  
+                  if (frequency === "OD") dailyQuantity = "1";
+                  else if (frequency === "BD") dailyQuantity = "2";
+                  else if (frequency === "TDS") dailyQuantity = "3";
+                  else if (frequency === "QID") dailyQuantity = "4";
+                  else if (frequency === "HS") dailyQuantity = "1";
+                  else if (frequency === "SOS") dailyQuantity = "";
+                  
+                  setCurrentObservationItem({
+                    ...currentObservationItem,
+                    frequency,
+                    dailyQuantity
+                  });
+                }}
+              >
+                <option value="">Select Frequency</option>
+                <option value="OD">Once Daily (OD)</option>
+                <option value="BD">Twice Daily (BD)</option>
+                <option value="TDS">Thrice Daily (TDS)</option>
+                <option value="QID">Four Times Daily (QID)</option>
+                <option value="HS">At Bedtime (HS)</option>
+                <option value="SOS">As Needed (SOS)</option>
+              </select>
+            </div>
+          </td>
+          <td className="p-4">
+            <div className="w-[200px]">
+              <Input
+                type="number"
+                min="1"
+                size="md"
+                value={currentObservationItem.dailyQuantity}
+                onChange={(e) => setCurrentObservationItem({
+                  ...currentObservationItem,
+                  dailyQuantity: e.target.value
+                })}
+                className="w-full border border-gray-300 rounded h-10"
+                required
+                disabled={currentObservationItem.frequency && currentObservationItem.frequency !== "SOS"}
+              />
+            </div>
+          </td>
+          <td className="p-4">
+            <div className="w-[80px] border border-gray-300 rounded p-2 h-10 flex items-center">
+              <Typography variant="small" color="blue-gray">
+                {currentObservationItem.availableQty || "-"}
+              </Typography>
+            </div>
+          </td>
+          <td className="p-4">
+            <div className="w-[200px]">
+              <Input
+                type="number"
+                min="1"
+                size="md"
+                value={currentObservationItem.days || "1"}
+                onChange={(e) => setCurrentObservationItem({
+                  ...currentObservationItem,
+                  days: e.target.value
+                })}
+                className="w-full border border-gray-300 rounded h-10"
+              />
+            </div>
+          </td>
+          <td className="p-4">
+            <IconButton 
+              variant="text" 
+              onClick={addObservationDetail}
+              disabled={!currentObservationItem.medicineId || !currentObservationItem.dailyQuantity}
+            >
+              <PlusCircleIcon className="h-5 w-5 text-green-500" />
+            </IconButton>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+)}
               </form>
             </CardBody>
             <CardFooter divider={true}>
