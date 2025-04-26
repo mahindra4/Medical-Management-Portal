@@ -26,7 +26,7 @@ export function AddProcedure() {
         outTime: "",
     });
 
-    // Fetch patients and hospitals when component mounts
+    // Fetch patients, hospitals, and generate OPD number when component mounts
     useEffect(() => {
         const fetchPatients = async () => {
             try {
@@ -55,7 +55,11 @@ export function AddProcedure() {
                 const response = await axios.get(apiRoutes.hospitals, {
                     withCredentials: true
                 });
-                setHospitalList(response.data.data);
+                console.log("Hospital List: ", response.data.data);
+                const hospitalData=response.data.data.map((item)=>{
+                    return item.name;
+                })
+                setHospitalList(hospitalData);
             } catch (error) {
                 console.error(`Error in fetching Hospital List: ${error?.response?.data?.message}`);
                 toast.error(
@@ -64,8 +68,51 @@ export function AddProcedure() {
             }
         };
         
+        const generateOPDNumber = async () => {
+            try {
+                const today = new Date();
+                const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear().toString().slice(-2)}`;
+                
+                // Fetch today's procedures to determine next increment number
+                const response = await axios.get(apiRoutes.Procedure, {
+                    withCredentials: true
+                });
+                
+                const todaysProcedures = response.data.filter(proc => {
+                    if (!proc.id) return false;
+                    // Check if the procedure ID starts with today's formatted date
+                    return proc.id.startsWith(formattedDate);
+                });
+                
+                // Find the highest increment number for today
+                let maxIncrement = 0;
+                todaysProcedures.forEach(proc => {
+                    const parts = proc.id.split('-');
+                    if (parts.length === 2) {
+                        const increment = parseInt(parts[1], 10);
+                        if (!isNaN(increment) && increment > maxIncrement) {
+                            maxIncrement = increment;
+                        }
+                    }
+                });
+                
+                // Generate new OPD number with next increment
+                const nextIncrement = maxIncrement + 1;
+                const opdNumber = `${formattedDate}-${nextIncrement}`;
+                
+                setFormData(prev => ({
+                    ...prev,
+                    opdNumber
+                }));
+            } catch (error) {
+                console.error("Error generating OPD number:", error);
+                toast.error("Failed to generate OPD number.");
+            }
+        };
+        
         fetchPatients();
         fetchHospitals();
+        generateOPDNumber();
     }, []);
 
     const handlePatientChange = (selectedOption) => {
@@ -83,30 +130,6 @@ export function AddProcedure() {
                 patientEmail: "",
                 patientName: ""
             }));
-        }
-    };
-    const PatientDetails = async (patientId) => {
-        console.log("Selected OPD Number: ", patientId);
-        try {
-            const response = await axios.get(`${apiRoutes.patientVitals}`, {
-                withCredentials: true
-            });
-            console.log("Patient Vitals: ", response.data.data);
-            //const patientID=response.data.data.patientId
-            // try{
-            //     const patientdetails=await axios.get(`${apiRoutes.patient}/${patientID}`, {
-            //         withCredentials: true
-            //     });
-            //     setGetPatientDetails(patientdetails.data.data);
-            // }
-            // catch(error){
-            //     console.error("Error in fetching patient ID: ", error);
-            // }
-
-
-        } catch (error) {
-            console.error("Error fetching patient vitals:", error);
-            toast.error("Failed to fetch patient vitals.");
         }
     };
 
@@ -149,8 +172,17 @@ export function AddProcedure() {
                 withCredentials: true
             });
             toast.success("Procedure record saved successfully!");
+            
+            // Reset form after successful submission
+            const today = new Date();
+            const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear().toString().slice(-2)}`;
+            
+            // Get the current increment and add 1 for the next form
+            const currentIncrement = parseInt(formData.opdNumber.split('-')[1], 10);
+            const nextOpdNumber = `${formattedDate}-${currentIncrement + 1}`;
+            
             setFormData({
-                opdNumber: "",
+                opdNumber: nextOpdNumber,
                 patientEmail: "",
                 patientName: "",
                 inTime: "",
@@ -179,16 +211,6 @@ export function AddProcedure() {
             referredHospital,
         }));
     };
-    const handleOPDChange = (e) => {                
-        const { name, value } = e.target;
-        PatientDetails(value);
-        setFormData({ ...formData,
-            [name]: value,
-             patientEmail:getpatientdetails.email,
-             patientName:getpatientdetails.name,
-             });
-        
-    }
 
     return (
         <>
@@ -213,17 +235,16 @@ export function AddProcedure() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block mb-2">
-                                        OPD Number <span className="text-red-500">*</span>:
+                                        OPD Number:
                                     </label>
                                     <input
                                         type="text"
                                         name="opdNumber"
-                                        placeholder="OPD Number"
                                         value={formData.opdNumber}
-                                        onChange={handleOPDChange}
-                                        required
-                                        className="w-full border border-gray-300 rounded-md p-2"
+                                        readOnly
+                                        className="w-full border border-gray-300 rounded-md p-2 bg-gray-100"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">Auto-generated OPD number</p>
                                 </div>
                                 
                                 <div>
