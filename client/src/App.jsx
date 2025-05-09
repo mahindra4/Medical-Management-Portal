@@ -57,6 +57,7 @@ import ProcedureDetail from "./pages/ProcedureDetail";
 import AddHospitalForm from "./pages/AddHospital";
 import HospitalList from "./pages/hospitalList";
 import UpdateHospitalForm from "./pages/UpdateHospital";
+import VisitingSpecialist from "./pages/VisitingSpecialist.jsx";
 
 function App() {
   const { userRole } = useAuthContext();
@@ -241,6 +242,11 @@ function App() {
           <Route path="/prescription/patient" element={
             <ProtectedRoute routeName="MEDICAL_HISTORY">
               <MedicalHistory />
+            </ProtectedRoute>
+          } />
+          <Route path="/visiting-specialist" element={
+            <ProtectedRoute routeName="VISITING_SPECIALIST_LIST">
+              <VisitingSpecialist />
             </ProtectedRoute>
           } />
           <Route path="/prescription/:id" element={
